@@ -32,8 +32,12 @@ function buildDefaultReturnUrl(status: PlisioReturnStatus): string {
   return url.toString();
 }
 
+function getPlisioEndpoint(): string {
+  return import.meta.env.VITE_PLISIO_CREATE_INVOICE_URL?.trim() || `${window.location.origin}/api/plisio/create-invoice`;
+}
+
 export function isPlisioConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_PLISIO_CREATE_INVOICE_URL?.trim());
+  return Boolean(getPlisioEndpoint());
 }
 
 export function getPlisioPlanLabel(): string {
@@ -45,7 +49,7 @@ export function getPlisioPriceLabel(): string {
 }
 
 export async function createPlisioInvoice(): Promise<PlisioCheckoutResponse> {
-  const endpoint = import.meta.env.VITE_PLISIO_CREATE_INVOICE_URL?.trim();
+  const endpoint = getPlisioEndpoint();
 
   if (!endpoint) {
     throw new Error('Plisio endpoint не настроен. Добавьте VITE_PLISIO_CREATE_INVOICE_URL.');
