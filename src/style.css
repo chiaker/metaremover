@@ -21,7 +21,7 @@
 
 html.dark {
   color-scheme: dark;
-  background: linear-gradient(165deg, #252028 0%, #2d2a32 42%, #1f2826 100%);
+  background: #1a1411;
 }
 
 * {
@@ -49,7 +49,7 @@ input {
 }
 
 html.dark .leaflet-container {
-  background: #3d3835;
+  background: #2a2218;
 }
 
 ::-webkit-scrollbar {
@@ -62,7 +62,7 @@ html.dark .leaflet-container {
 }
 
 html.dark ::-webkit-scrollbar-track {
-  background: rgba(41, 37, 36, 0.5);
+  background: rgba(36, 28, 22, 0.55);
 }
 
 ::-webkit-scrollbar-thumb {

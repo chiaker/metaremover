@@ -21,7 +21,7 @@ export function ThemeToggle() {
           isDark ? 'translate-x-6' : 'translate-x-0',
         ].join(' ')}
       >
-        {isDark ? <Moon className="h-4 w-4 text-violet-200" strokeWidth={2} /> : <Sun className="h-4 w-4 text-amber-500" strokeWidth={2} />}
+        {isDark ? <Moon className="h-4 w-4 text-amber-200/90" strokeWidth={2} /> : <Sun className="h-4 w-4 text-amber-500" strokeWidth={2} />}
       </span>
       <span className="sr-only">{isDark ? 'Dark' : 'Light'} mode</span>
     </button>

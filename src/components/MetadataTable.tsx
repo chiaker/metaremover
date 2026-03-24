@@ -61,7 +61,7 @@ export function MetadataTable({ sections }: MetadataTableProps) {
                   className={[
                     'grid gap-2 rounded-2xl border px-3 py-3 md:grid-cols-[0.8fr_1.2fr_auto] md:items-center',
                     field.isHighlighted
-                      ? 'border-violet-200/90 bg-violet-50/60 dark:border-violet-500/25 dark:bg-violet-950/30'
+                      ? 'border-amber-200/90 bg-amber-50/60 dark:border-amber-800/35 dark:bg-[#3a2e26]/75'
                       : 'border-stone-200/70 bg-white/70 dark:border-stone-600/40 dark:bg-stone-800/40',
                   ].join(' ')}
                 >

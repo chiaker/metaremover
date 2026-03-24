@@ -41,12 +41,12 @@ export function FileCard({
     <article className="overflow-hidden rounded-3xl border border-stone-200/90 bg-white/80 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
       <div className="relative aspect-[4/3] overflow-hidden border-b border-stone-200/80 bg-stone-100 dark:border-stone-600/40 dark:bg-stone-900/50">
         {file.status === 'loading' ? (
-          <div className="relative flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-stone-100 via-rose-50/40 to-teal-50/30 dark:from-stone-800 dark:via-rose-950/30 dark:to-teal-950/20">
-            <div className="pointer-events-none absolute inset-0 animate-pulse bg-rose-100/20 dark:bg-rose-500/10" aria-hidden />
+          <div className="relative flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-stone-100 via-rose-50/40 to-teal-50/30 dark:bg-[#1e1916]">
+            <div className="pointer-events-none absolute inset-0 animate-pulse bg-rose-100/20 dark:bg-amber-950/20" aria-hidden />
             <div className="relative flex flex-col items-center gap-3 px-6">
               <div className="relative flex items-center justify-center">
-                <div className="absolute h-14 w-14 animate-pulse rounded-full bg-rose-200/40 dark:bg-rose-400/15" aria-hidden />
-                <LoaderCircle className="relative h-11 w-11 animate-spin text-rose-400/90 dark:text-rose-300/80" strokeWidth={2} />
+                <div className="absolute h-14 w-14 animate-pulse rounded-full bg-rose-200/40 dark:bg-amber-900/25" aria-hidden />
+                <LoaderCircle className="relative h-11 w-11 animate-spin text-rose-400/90 dark:text-amber-400/85" strokeWidth={2} />
               </div>
               <p className="text-center text-sm font-medium text-stone-700 dark:text-stone-300">Working on your file…</p>
               {file.kind === 'heic' ? (
@@ -175,7 +175,7 @@ export function FileCard({
 
                       onToggleSelectiveKey(key);
                     }}
-                    className="h-4 w-4 rounded border-stone-300 text-violet-500 focus:ring-violet-300 dark:border-stone-600 dark:text-violet-400 dark:focus:ring-violet-600/50"
+                    className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-300 dark:border-stone-600 dark:text-amber-400 dark:focus:ring-amber-700/45"
                   />
                   <span>{LABELS[key]}</span>
                 </label>

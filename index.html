@@ -2,12 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#faf8f5" />
     <script>
       try {
-        if (localStorage.getItem('metaremover-theme') === 'dark') document.documentElement.classList.add('dark');
+        if (localStorage.getItem('metaremover-theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+          var tc = document.querySelector('meta[name="theme-color"]');
+          if (tc) tc.setAttribute('content', '#1a1411');
+        }
       } catch (_) {}
     </script>
     <meta name="author" content="MetaRemover" />
@@ -30,7 +39,7 @@
       property="og:description"
       content="Privacy-first image metadata remover for JPG, PNG, WebP, HEIC and TIFF. No uploads, 100% client-side processing."
     />
-    <meta property="og:image" content="https://www.metaremover.tech/favicon.svg" />
+    <meta property="og:image" content="https://www.metaremover.tech/apple-touch-icon.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MetaRemover | Remove Image Metadata In Your Browser" />
@@ -38,7 +47,7 @@
       name="twitter:description"
       content="Remove EXIF, GPS and other metadata locally in your browser. Privacy-first, no uploads."
     />
-    <meta name="twitter:image" content="https://www.metaremover.tech/favicon.svg" />
+    <meta name="twitter:image" content="https://www.metaremover.tech/apple-touch-icon.png" />
 
     <title>MetaRemover | Remove Image Metadata In Your Browser</title>
   </head>

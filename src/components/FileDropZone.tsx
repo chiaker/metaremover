@@ -21,20 +21,20 @@ export function FileDropZone({ disabled = false, onFilesSelected }: FileDropZone
     <div
       {...getRootProps()}
       className={[
-        'group relative overflow-hidden rounded-3xl border border-stone-200/90 bg-white/70 p-8 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55',
+        'group relative overflow-hidden rounded-3xl border border-stone-200/90 bg-white/70 p-8 shadow-sm backdrop-blur-sm dark:border-[#3d322c]/55 dark:bg-[#231c18]/92',
         'transition-colors duration-200',
         isDragActive
           ? 'border-rose-300/80 bg-rose-50/50 ring-1 ring-rose-200/60 dark:border-rose-400/30 dark:bg-rose-950/25 dark:ring-rose-500/20'
-          : 'hover:border-stone-300 hover:bg-white/90 dark:hover:border-stone-500/50 dark:hover:bg-stone-800/70',
+          : 'hover:border-stone-300 hover:bg-white/90 dark:hover:border-[#4a3f38]/60 dark:hover:bg-[#2a221c]/95',
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
       ].join(' ')}
     >
       <input {...getInputProps()} />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,207,232,0.35),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(244,114,182,0.12),transparent)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(251,207,232,0.35),transparent)] dark:hidden" />
       <div className="relative grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
         <div className="space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-violet-100/80 px-3 py-1 text-xs font-medium tracking-[0.18em] text-violet-800 uppercase dark:border-violet-500/25 dark:bg-violet-950/40 dark:text-violet-200">
-            <Shield className="h-4 w-4 text-violet-600 dark:text-violet-300" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/90 bg-amber-50/90 px-3 py-1 text-xs font-medium tracking-[0.18em] text-amber-950 uppercase dark:border-amber-800/45 dark:bg-[#3a2e26]/90 dark:text-amber-100">
+            <Shield className="h-4 w-4 text-amber-800 dark:text-amber-300" />
             Privacy First
           </div>
           <div className="space-y-3">

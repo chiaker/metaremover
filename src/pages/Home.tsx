@@ -686,7 +686,7 @@ export function Home() {
                 type="button"
                 onClick={handleVerifyCode}
                 disabled={authLoading}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-200 px-4 py-3 text-sm font-semibold text-violet-950 transition hover:bg-violet-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-violet-500/25 dark:text-violet-100 dark:hover:bg-violet-500/35"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-200 px-4 py-3 text-sm font-semibold text-amber-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-amber-900/35 dark:text-amber-100 dark:hover:bg-amber-800/40"
               >
                 <LogIn className="h-4 w-4" />
                 Verify code
@@ -703,7 +703,7 @@ export function Home() {
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-3xl border border-stone-200/90 bg-white/70 p-5 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
             <div className="flex items-center gap-3 text-stone-500 dark:text-stone-400">
-              <Files className="h-5 w-5 text-violet-400 dark:text-violet-300/80" />
+              <Files className="h-5 w-5 text-amber-600 dark:text-amber-400/85" />
               Files loaded
             </div>
             <div className="mt-3 text-3xl font-semibold text-stone-800 dark:text-stone-100">{overview.totalFiles}</div>
@@ -738,7 +738,7 @@ export function Home() {
               paymentResult.status === 'success'
                 ? 'border-teal-200/90 bg-teal-50/60 dark:border-teal-800/40 dark:bg-teal-950/35'
                 : paymentResult.status === 'verifying'
-                  ? 'border-violet-200/90 bg-violet-50/50 dark:border-violet-800/35 dark:bg-violet-950/30'
+                  ? 'border-amber-200/90 bg-amber-50/50 dark:border-amber-800/40 dark:bg-[#3a2e26]/80'
                   : 'border-amber-200/90 bg-amber-50/50 dark:border-amber-800/35 dark:bg-amber-950/30',
             ].join(' ')}
           >
@@ -748,7 +748,7 @@ export function Home() {
                   {paymentResult.status === 'success' ? (
                     <CheckCircle2 className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                   ) : paymentResult.status === 'verifying' ? (
-                    <LoaderCircle className="h-5 w-5 animate-spin text-violet-500 dark:text-violet-300" />
+                    <LoaderCircle className="h-5 w-5 animate-spin text-amber-600 dark:text-amber-400/90" />
                   ) : (
                     <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   )}
