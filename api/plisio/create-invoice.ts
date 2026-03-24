@@ -1,4 +1,4 @@
-import { buildReturnUrl, createOrderNumber, createPremiumExpiresAt, getPlisioConfig, sendJson } from './_shared';
+import { buildReturnUrl, createOrderNumber, createPremiumExpiresAt, getPlisioConfig, sendJson } from './_shared.js';
 
 export default async function handler(request: any, response: any) {
   if (request.method !== 'POST') {

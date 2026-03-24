@@ -1,4 +1,4 @@
-import { getPlisioConfig, sendJson, verifyPlisioCallback } from './_shared';
+import { getPlisioConfig, sendJson, verifyPlisioCallback } from './_shared.js';
 
 export default async function handler(request: any, response: any) {
   if (request.method !== 'POST') {
