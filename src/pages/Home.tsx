@@ -574,9 +574,11 @@ export function Home() {
                 {authenticatedEmail ? `Signed in as ${authenticatedEmail}` : 'Sign in with email code to restore premium'}
               </h2>
               <p className="text-sm leading-6 text-slate-200">
-                {premium.active
-                  ? 'Premium is active and stored on the backend.'
-                  : `Free plan: ${usage.remaining ?? 0} of ${usage.limit ?? 5} cleaned files left today.`}
+                {statusLoading
+                  ? 'Loading account status...'
+                  : premium.active
+                    ? 'Premium is active and stored on the backend.'
+                    : `Free plan: ${usage.remaining ?? 0} of ${usage.limit ?? 5} cleaned files left today.`}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -721,84 +723,6 @@ export function Home() {
             </div>
           </section>
         )}
-
-        <section className="rounded-[2rem] border border-white/10 bg-slate-900/70 p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-2">
-              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Account & limits</div>
-              <h2 className="text-2xl font-semibold text-white">
-                {authenticatedEmail ? authenticatedEmail : 'Sign in to restore premium on any device'}
-              </h2>
-              <p className="text-sm leading-6 text-slate-400">
-                {statusLoading
-                  ? 'Loading account status...'
-                  : premium.active
-                    ? 'Premium is stored on the backend and tied to your email account.'
-                    : `Free plan: ${usage.remaining ?? 0} of ${usage.limit ?? 5} cleaned files left today.`}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {authenticatedEmail ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={authLoading}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out
-                </button>
-              ) : (
-                <>
-                  <input
-                    type="email"
-                    value={authEmail}
-                    onChange={(event) => setAuthEmail(event.target.value)}
-                    placeholder="Enter email for premium access"
-                    className="min-w-[260px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSendCode}
-                    disabled={authLoading}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <Mail className="h-4 w-4" />
-                    Send code
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {!authenticatedEmail && codeRequested && (
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={authCode}
-                onChange={(event) => setAuthCode(event.target.value)}
-                placeholder="Enter 6-digit code"
-                className="min-w-[220px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
-              />
-              <button
-                type="button"
-                onClick={handleVerifyCode}
-                disabled={authLoading}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <LogIn className="h-4 w-4" />
-                Verify code
-              </button>
-              {devCode && (
-                <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-                  Dev code: {devCode}
-                </div>
-              )}
-            </div>
-          )}
-        </section>
 
         <section className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
