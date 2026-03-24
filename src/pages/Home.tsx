@@ -13,6 +13,7 @@ import {
   detectFileKind,
   downloadBlob,
   isSupportedImage,
+  materializeFile,
 } from '../lib/fileTypes';
 import { createPreviewAsset } from '../lib/heicHelper';
 import { clearPlisioReturnState, createPlisioInvoice, getPlisioPlanLabel, getPlisioPriceLabel, isPlisioConfigured, readPlisioReturnState } from '../lib/plisio';
@@ -241,14 +242,26 @@ export function Home() {
     const loadedEntries = await Promise.all(
       acceptedFiles.map(async (file) => {
         const kind = detectFileKind(file);
+        let localFile: File | undefined;
 
         try {
-          const preview = await createPreviewAsset(file, kind);
-          const metadata = await readMetadata(file);
+          localFile = await materializeFile(file);
+          const preview = await createPreviewAsset(localFile, kind);
+          let metadata;
+
+          try {
+            metadata = await readMetadata(localFile);
+          } catch (metaError) {
+            if (kind === 'heic' && preview.blob !== localFile) {
+              metadata = await readMetadata(preview.blob);
+            } else {
+              throw metaError;
+            }
+          }
 
           return {
             id: crypto.randomUUID(),
-            file,
+            file: localFile,
             kind,
             previewUrl: URL.createObjectURL(preview.blob),
             previewNote: preview.note,
@@ -260,17 +273,19 @@ export function Home() {
             expiresAt: Date.now() + AUTO_CLEAR_MS,
           } satisfies ManagedFile;
         } catch (error) {
+          const fallbackFile = localFile ?? file;
+
           return {
             id: crypto.randomUUID(),
-            file,
+            file: fallbackFile,
             kind,
-            previewUrl: URL.createObjectURL(file),
+            previewUrl: URL.createObjectURL(fallbackFile),
             previewNote: undefined,
             metadata: undefined,
             cleaned: undefined,
             selectiveKeys: [],
             status: 'error',
-            error: error instanceof Error ? error.message : 'File could not be processed.',
+            error: error instanceof Error ? error.message : 'Не удалось обработать файл.',
             expiresAt: Date.now() + AUTO_CLEAR_MS,
           } satisfies ManagedFile;
         }

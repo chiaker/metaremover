@@ -50,6 +50,24 @@ export function isSupportedImage(file: File): boolean {
   return detectFileKind(file) !== 'unknown';
 }
 
+export async function materializeFile(file: File): Promise<File> {
+  let buffer: ArrayBuffer;
+
+  try {
+    buffer = await file.arrayBuffer();
+  } catch (cause) {
+    const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const hint = isMobile ? ' На телефоне откройте фото через приложение «Файлы» или выберите снимок заново.' : '';
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    throw new Error(`Не удалось прочитать файл.${hint} (${detail})`);
+  }
+
+  return new File([buffer], file.name, {
+    type: file.type || 'application/octet-stream',
+    lastModified: file.lastModified,
+  });
+}
+
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) {
     return '0 B';

@@ -21,11 +21,20 @@ async function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: n
 }
 
 export async function convertHeicToJpeg(file: File): Promise<PreviewResult> {
-  const converted = await heic2any({
-    blob: file,
-    toType: 'image/jpeg',
-    quality: 0.92,
-  });
+  let converted: Blob | Blob[];
+
+  try {
+    converted = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.92,
+    });
+  } catch (cause) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    throw new Error(
+      `HEIC/HEIF не удалось обработать в этом браузере. Попробуйте Chrome или Edge последней версии; часть файлов с камер (другой кодек/битность) может не поддерживаться. (${detail})`,
+    );
+  }
 
   const blob = Array.isArray(converted) ? converted[0] : converted;
 
