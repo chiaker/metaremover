@@ -26,6 +26,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "cookie": "^1.1.1",
     "exifreader": "^4.37.0",
+    "heic-decode": "^2.1.0",
     "heic2any": "^0.0.4",
     "jszip": "^3.10.1",
     "leaflet": "^1.9.4",
