@@ -55,11 +55,12 @@ export async function materializeFile(file: File): Promise<File> {
 
   try {
     buffer = await file.arrayBuffer();
-  } catch (cause) {
+  } catch {
     const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const hint = isMobile ? ' На телефоне откройте фото через приложение «Файлы» или выберите снимок заново.' : '';
-    const detail = cause instanceof Error ? cause.message : String(cause);
-    throw new Error(`Не удалось прочитать файл.${hint} (${detail})`);
+    const hint = isMobile
+      ? ' On a phone, try again or pick the file from your Files app.'
+      : ' Try selecting the file again.';
+    throw new Error(`Could not read this file.${hint}`);
   }
 
   return new File([buffer], file.name, {

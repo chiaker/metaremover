@@ -218,7 +218,7 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('Не удалось прочитать файл в браузере.'));
+    reader.onerror = () => reject(new Error('Could not read this file in your browser.'));
     reader.readAsDataURL(blob);
   });
 }
@@ -303,7 +303,7 @@ function stripJpegMetadataSegments(
   },
 ): Uint8Array {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) {
-    throw new Error('Файл не выглядит как JPEG.');
+    throw new Error('This file does not look like a valid JPEG.');
   }
 
   const keptSegments: Uint8Array[] = [];
@@ -488,7 +488,7 @@ async function rasterBlobToCanvas(blob: Blob): Promise<HTMLCanvasElement> {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const element = new Image();
       element.onload = () => resolve(element);
-      element.onerror = () => reject(new Error('Не удалось декодировать изображение для очистки.'));
+      element.onerror = () => reject(new Error('Could not decode this image for cleaning.'));
       element.src = imageUrl;
     });
 
@@ -498,7 +498,7 @@ async function rasterBlobToCanvas(blob: Blob): Promise<HTMLCanvasElement> {
     const context = canvas.getContext('2d');
 
     if (!context) {
-      throw new Error('Браузер не дал 2D-контекст для очистки изображения.');
+      throw new Error('Your browser blocked image processing for this file.');
     }
 
     context.drawImage(image, 0, 0);
@@ -515,7 +515,7 @@ async function stripRasterMetadata(file: File, outputType: string): Promise<{ bl
   });
 
   if (!blob) {
-    throw new Error('Не удалось получить очищенный файл.');
+    throw new Error('Could not create the cleaned file.');
   }
 
   return { blob };
@@ -545,7 +545,7 @@ async function buildCleanBlob(file: File, kind: FileKind, selectiveKeys: Selecti
   }
 
   if (selectiveKeys.length > 0) {
-    throw new Error('Selective removal сейчас работает только для JPEG/JPG, остальные форматы очищаются целиком.');
+    throw new Error('Selective removal is only available for JPEG files. Other formats are fully stripped.');
   }
 
   if (kind === 'heic') {
@@ -568,11 +568,11 @@ async function buildCleanBlob(file: File, kind: FileKind, selectiveKeys: Selecti
     const raster = await stripRasterMetadata(file, 'image/png');
     return {
       ...raster,
-      note: 'GIF сохраняется как PNG после очистки, потому что браузерный canvas не экспортирует GIF.',
+      note: 'Your cleaned file downloads as PNG.',
     };
   }
 
-  throw new Error('Этот формат пока нельзя очистить локально в текущем браузере.');
+  throw new Error('This format cannot be cleaned in this browser yet.');
 }
 
 export async function cleanMetadata(

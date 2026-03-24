@@ -54,7 +54,7 @@ export async function createPlisioInvoice(email: string): Promise<PlisioCheckout
   const endpoint = getPlisioEndpoint();
 
   if (!endpoint) {
-    throw new Error('Plisio endpoint не настроен. Добавьте VITE_PLISIO_CREATE_INVOICE_URL.');
+    throw new Error('Checkout is not available right now. Please try again later.');
   }
 
   const successReturnUrl = import.meta.env.VITE_PLISIO_SUCCESS_URL?.trim() || buildDefaultReturnUrl('success');
@@ -90,13 +90,13 @@ export async function createPlisioInvoice(email: string): Promise<PlisioCheckout
     | null;
 
   if (!response.ok) {
-    throw new Error(data?.message || 'Не удалось создать Plisio invoice.');
+    throw new Error(data?.message || 'Could not start checkout. Please try again.');
   }
 
   const invoiceUrl = data?.invoiceUrl || data?.invoice_url;
 
   if (!invoiceUrl) {
-    throw new Error('Backend не вернул invoice_url от Plisio.');
+    throw new Error('Could not start checkout. Please try again.');
   }
 
   return {

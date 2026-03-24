@@ -20,15 +20,14 @@ export function PremiumBanner({ premium, onActivate, onDisable }: PremiumBannerP
           </div>
           <h2 className="text-2xl font-semibold tracking-tight text-white">Unlock selective removal and unlimited batch.</h2>
           <p className="max-w-3xl text-sm leading-6 text-emerald-50/85">
-            Premium enables selective EXIF cleanup, removes the free batch cap, keeps original filenames on download and
-            hides upsell blocks. Lemon Squeezy checkout hook can be wired later, while this demo uses localStorage for
-            premium state.
+            Premium unlocks selective metadata removal, higher batch limits, original filenames on download, and fewer
+            upgrade prompts. Your subscription is tied to your account after checkout.
           </p>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
-            {premium.active && premium.expiresAt ? `Premium active for ~${formatExpiry(premium.expiresAt)}` : '$4.99/mo concept banner'}
+            {premium.active && premium.expiresAt ? `Premium active for ~${formatExpiry(premium.expiresAt)}` : 'See checkout for current pricing'}
           </div>
           {premium.active ? (
             <button

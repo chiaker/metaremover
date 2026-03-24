@@ -14,7 +14,7 @@ async function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: n
   });
 
   if (!blob) {
-    throw new Error('Не удалось подготовить изображение для браузерной обработки.');
+    throw new Error('Could not prepare this image in your browser.');
   }
 
   return blob;
@@ -28,7 +28,7 @@ async function heic2anyOnce(blob: Blob, toType: 'image/jpeg' | 'image/png', qual
   });
   const out = Array.isArray(converted) ? converted[0] : converted;
   if (!out) {
-    throw new Error('Пустой результат конвертации HEIC.');
+    throw new Error('HEIC conversion returned an empty result.');
   }
   return out;
 }
@@ -39,7 +39,7 @@ async function imageBlobToJpeg(blob: Blob, quality: number): Promise<Blob> {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const element = new Image();
       element.onload = () => resolve(element);
-      element.onerror = () => reject(new Error('Не удалось отрисовать промежуточное изображение.'));
+      element.onerror = () => reject(new Error('Could not display this image while converting it.'));
       element.src = url;
     });
 
@@ -49,7 +49,7 @@ async function imageBlobToJpeg(blob: Blob, quality: number): Promise<Blob> {
     const context = canvas.getContext('2d');
 
     if (!context) {
-      throw new Error('Браузер не дал 2D-контекст для HEIC.');
+      throw new Error('Your browser blocked image drawing for this file.');
     }
 
     context.drawImage(image, 0, 0);
@@ -66,7 +66,7 @@ async function convertHeicWithLibheif(file: File): Promise<Blob> {
   const { width, height, data } = await decodeHeic({ buffer: new Uint8Array(buffer) });
 
   if (!width || !height) {
-    throw new Error('Некорректный размер кадра HEIC.');
+    throw new Error('This HEIC file has an invalid image size.');
   }
 
   const canvas = document.createElement('canvas');
@@ -75,7 +75,7 @@ async function convertHeicWithLibheif(file: File): Promise<Blob> {
   const context = canvas.getContext('2d');
 
   if (!context) {
-    throw new Error('Браузер не дал 2D-контекст для HEIC.');
+    throw new Error('Your browser blocked image drawing for this file.');
   }
 
   const rgba = new Uint8ClampedArray(data.length);
@@ -85,35 +85,30 @@ async function convertHeicWithLibheif(file: File): Promise<Blob> {
 }
 
 export async function convertHeicToJpeg(file: File): Promise<PreviewResult> {
-  const note =
-    'HEIC превью и очистка отдаются как JPEG для стабильного скачивания в браузере. При сложных файлах используется запасной декодер (libheif).';
-  const errors: string[] = [];
-
   try {
     const blob = await heic2anyOnce(file, 'image/jpeg', 0.92);
-    return { blob, note };
-  } catch (first) {
-    errors.push(first instanceof Error ? first.message : String(first));
+    return { blob };
+  } catch {
+    /* try next path */
   }
 
   try {
     const pngBlob = await heic2anyOnce(file, 'image/png');
     const jpegBlob = await imageBlobToJpeg(pngBlob, 0.92);
-    return { blob: jpegBlob, note };
-  } catch (second) {
-    errors.push(second instanceof Error ? second.message : String(second));
+    return { blob: jpegBlob };
+  } catch {
+    /* try next path */
   }
 
   try {
     const blob = await convertHeicWithLibheif(file);
-    return { blob, note };
-  } catch (third) {
-    errors.push(third instanceof Error ? third.message : String(third));
+    return { blob };
+  } catch {
+    /* fall through */
   }
 
-  const detail = errors.filter(Boolean).join(' | ');
   throw new Error(
-    `HEIC/HEIF не удалось обработать ни одним доступным декодером. Часть снимков (10-bit, HDR, серийная съёмка) в браузере может быть недоступна — откройте фото в «Фото»/редакторе, экспортируйте в JPG и загрузите снова. Технические детали: ${detail}`,
+    'This HEIC file could not be opened here. Export it as JPEG or PNG from your Photos app or editor, then upload that file instead.',
   );
 }
 
@@ -122,7 +117,7 @@ export async function convertTiffToPng(file: File): Promise<PreviewResult> {
   const ifds = UTIF.decode(buffer);
 
   if (!ifds.length) {
-    throw new Error('TIFF не содержит декодируемых кадров.');
+    throw new Error('This TIFF file does not contain a readable image.');
   }
 
   UTIF.decodeImage(buffer, ifds[0]);
@@ -132,7 +127,7 @@ export async function convertTiffToPng(file: File): Promise<PreviewResult> {
   const height = Number((firstFrame as { height?: number }).height ?? 0);
 
   if (!width || !height) {
-    throw new Error('Не удалось определить размер TIFF-изображения.');
+    throw new Error('Could not read the size of this TIFF image.');
   }
 
   const canvas = document.createElement('canvas');
@@ -142,7 +137,7 @@ export async function convertTiffToPng(file: File): Promise<PreviewResult> {
   const context = canvas.getContext('2d');
 
   if (!context) {
-    throw new Error('Браузер не дал 2D-контекст для TIFF.');
+    throw new Error('Your browser blocked image drawing for this file.');
   }
 
   const imageData = new ImageData(new Uint8ClampedArray(rgba), width, height);
@@ -150,7 +145,6 @@ export async function convertTiffToPng(file: File): Promise<PreviewResult> {
 
   return {
     blob: await canvasToBlob(canvas, 'image/png'),
-    note: 'TIFF превью и очистка отдаются как PNG, потому что браузеры редко умеют сохранять TIFF без метаданных напрямую.',
   };
 }
 

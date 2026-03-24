@@ -285,7 +285,7 @@ export function Home() {
             cleaned: undefined,
             selectiveKeys: [],
             status: 'error',
-            error: error instanceof Error ? error.message : 'Не удалось обработать файл.',
+            error: error instanceof Error ? error.message : 'Could not process this file.',
             expiresAt: Date.now() + AUTO_CLEAR_MS,
           } satisfies ManagedFile;
         }
