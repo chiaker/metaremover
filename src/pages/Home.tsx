@@ -787,6 +787,10 @@ export function Home() {
             </p>
           </section>
         )}
+
+        <footer className="border-t border-white/10 px-2 pt-2 pb-6 text-center text-sm text-slate-400">
+          Feedback: <a href="mailto:metaremover@releugva.resend.app" className="text-slate-200 underline underline-offset-4">metaremover@releugva.resend.app</a>
+        </footer>
       </div>
 
       {showPremiumPrompt && (
