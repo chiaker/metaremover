@@ -75,3 +75,17 @@ export interface PremiumState {
   active: boolean;
   expiresAt: number | null;
 }
+
+export interface UsageState {
+  date: string;
+  limit: number | null;
+  used: number;
+  remaining: number | null;
+}
+
+export interface AccountStatus {
+  authenticated: boolean;
+  email: string | null;
+  premium: PremiumState;
+  usage: UsageState;
+}

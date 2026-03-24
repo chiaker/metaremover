@@ -9,6 +9,11 @@
 For `metaremover.tech` on `Vercel`, the project now includes ready API routes:
 
 ```text
+api/auth/request-link.ts
+api/auth/verify.ts
+api/auth/logout.ts
+api/premium/status.ts
+api/usage/consume.ts
 api/plisio/create-invoice.ts
 api/plisio/webhook.ts
 ```
@@ -25,6 +30,7 @@ https://www.metaremover.tech/api/plisio/webhook
 Add these in Vercel Project Settings -> Environment Variables:
 
 ```text
+DATABASE_URL=your_neon_database_url
 PLISIO_SECRET_KEY=your_secret_key
 PLISIO_PRICE_USD=4.99
 PLISIO_PLAN_NAME=MetaRemover Premium
@@ -33,9 +39,11 @@ PLISIO_CALLBACK_URL=https://www.metaremover.tech/api/plisio/webhook?json=true
 PLISIO_SUCCESS_URL=https://www.metaremover.tech/
 PLISIO_FAIL_URL=https://www.metaremover.tech/
 PREMIUM_DURATION_DAYS=30
+RESEND_API_KEY=your_resend_api_key
+AUTH_FROM_EMAIL=MetaRemover <noreply@metaremover.tech>
 ```
 
-`PLISIO_SECRET_KEY` is required. The rest are optional but recommended.
+`DATABASE_URL`, `PLISIO_SECRET_KEY` and `RESEND_API_KEY` are required for the full production flow.
 
 ### 1. Frontend env
 
@@ -87,10 +95,14 @@ npm run preview
 ### 5. Current frontend flow
 
 - User clicks a premium feature.
+- User enters an email for premium purchase or signs in with a one-time email code.
 - Frontend opens the premium prompt.
 - `Pay with Plisio` calls `VITE_PLISIO_CREATE_INVOICE_URL`.
-- Backend creates a Plisio invoice and returns `invoiceUrl`.
+- Backend creates a payment session, stores the purchaser email and returns `invoiceUrl`.
 - Browser redirects to Plisio checkout.
+- `Plisio` webhook activates premium on the backend after confirmed payment.
+- Frontend reads account status from `/api/premium/status`.
+- Free users can clean up at most 5 files per day through `/api/usage/consume`.
 - After payment, frontend expects return params like:
 
 ```text
@@ -107,6 +119,6 @@ https://www.metaremover.tech/?provider=plisio&premium=success&expires_at=1767225
 
 - The included `examples/plisio-server.mjs` is only a starter integration.
 - On `Vercel`, prefer the built-in `api/plisio/*.ts` routes instead of the local example server.
-- For production you should verify Plisio callbacks on the backend and unlock premium only after confirmed payment.
-- Current app stores premium state in `localStorage`, so a full production-grade premium system still needs auth and backend persistence.
+- Premium is now stored on the backend and tied to email-based sign-in.
+- Free daily quota is also enforced on the backend.
 - Use one canonical domain everywhere. If the site opens on `www.metaremover.tech`, then Plisio callback and return URLs must also use `www.metaremover.tech`.

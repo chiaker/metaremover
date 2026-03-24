@@ -21,6 +21,8 @@
     "vite": "^6.4.1"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "cookie": "^1.1.1",
     "exifreader": "^4.37.0",
     "heic2any": "^0.0.4",
     "jszip": "^3.10.1",
@@ -31,6 +33,7 @@
     "react-dom": "^19.2.4",
     "react-dropzone": "^15.0.0",
     "react-leaflet": "^5.0.0",
+    "resend": "^6.9.4",
     "utif": "^3.1.0"
   }
 }

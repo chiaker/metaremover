@@ -1,6 +1,7 @@
 type PlisioCheckoutResponse = {
   invoiceUrl: string;
   txnId?: string;
+  orderNumber?: string;
 };
 
 type PlisioReturnStatus = 'success' | 'failed' | 'cancelled';
@@ -9,6 +10,7 @@ type PlisioReturnState = {
   status: PlisioReturnStatus;
   expiresAt: number | null;
   txnId: string | null;
+  orderNumber: string | null;
 };
 
 function normalizeExpiresAt(value: string | null): number | null {
@@ -48,7 +50,7 @@ export function getPlisioPriceLabel(): string {
   return import.meta.env.VITE_PLISIO_PRICE_USD?.trim() || '4.99';
 }
 
-export async function createPlisioInvoice(): Promise<PlisioCheckoutResponse> {
+export async function createPlisioInvoice(email: string): Promise<PlisioCheckoutResponse> {
   const endpoint = getPlisioEndpoint();
 
   if (!endpoint) {
@@ -64,6 +66,7 @@ export async function createPlisioInvoice(): Promise<PlisioCheckoutResponse> {
     sourceAmount: Number(import.meta.env.VITE_PLISIO_PRICE_USD || '4.99'),
     successReturnUrl,
     failReturnUrl,
+    email,
   };
 
   const response = await fetch(endpoint, {
@@ -80,6 +83,8 @@ export async function createPlisioInvoice(): Promise<PlisioCheckoutResponse> {
         invoice_url?: string;
         txnId?: string;
         txn_id?: string;
+        orderNumber?: string;
+        order_number?: string;
         message?: string;
       }
     | null;
@@ -97,6 +102,7 @@ export async function createPlisioInvoice(): Promise<PlisioCheckoutResponse> {
   return {
     invoiceUrl,
     txnId: data?.txnId || data?.txn_id,
+    orderNumber: data?.orderNumber || data?.order_number,
   };
 }
 
@@ -117,12 +123,13 @@ export function readPlisioReturnState(): PlisioReturnState | null {
     status: premium as PlisioReturnStatus,
     expiresAt: normalizeExpiresAt(params.get('expires_at')),
     txnId: params.get('txn_id'),
+    orderNumber: params.get('order_number'),
   };
 }
 
 export function clearPlisioReturnState(): void {
   const url = new URL(window.location.href);
-  ['provider', 'premium', 'expires_at', 'txn_id'].forEach((key) => {
+  ['provider', 'premium', 'expires_at', 'txn_id', 'order_number'].forEach((key) => {
     url.searchParams.delete(key);
   });
   window.history.replaceState({}, document.title, url.toString());

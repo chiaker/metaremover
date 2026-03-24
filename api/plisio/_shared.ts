@@ -10,11 +10,23 @@ export function getBaseUrl(request: any): string {
   return `${protocol}://${host}`;
 }
 
-export function buildReturnUrl(urlString: string, status: 'success' | 'failed', expiresAt: number) {
+export function buildReturnUrl(
+  urlString: string,
+  status: 'success' | 'failed',
+  expiresAt: number,
+  extraParams: Record<string, string | number | null | undefined> = {},
+) {
   const url = new URL(urlString);
   url.searchParams.set('provider', 'plisio');
   url.searchParams.set('premium', status);
   url.searchParams.set('expires_at', String(expiresAt));
+
+  Object.entries(extraParams).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
   return url.toString();
 }
 

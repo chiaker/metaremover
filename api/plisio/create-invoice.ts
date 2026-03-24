@@ -1,4 +1,6 @@
 import { buildReturnUrl, createOrderNumber, createPremiumExpiresAt, getPlisioConfig, sendJson } from './_shared.js';
+import { createPaymentSession } from '../_lib/repository.js';
+import { isValidEmail } from '../_lib/session.js';
 
 export default async function handler(request: any, response: any) {
   if (request.method !== 'POST') {
@@ -8,6 +10,12 @@ export default async function handler(request: any, response: any) {
   }
 
   const config = getPlisioConfig(request);
+  const email = String(request.body?.email || '').trim().toLowerCase();
+
+  if (!isValidEmail(email)) {
+    sendJson(response, 400, { message: 'A valid email is required for premium purchase.' });
+    return;
+  }
 
   if (!config.apiKey) {
     sendJson(response, 500, { message: 'Missing PLISIO_SECRET_KEY in Vercel environment variables.' });
@@ -15,13 +23,22 @@ export default async function handler(request: any, response: any) {
   }
 
   const expiresAt = createPremiumExpiresAt();
-  const successUrl = buildReturnUrl(config.successUrl, 'success', expiresAt);
-  const failUrl = buildReturnUrl(config.failUrl, 'failed', expiresAt);
+  const orderNumber = createOrderNumber();
+  const successUrl = buildReturnUrl(config.successUrl, 'success', expiresAt, { order_number: orderNumber });
+  const failUrl = buildReturnUrl(config.failUrl, 'failed', expiresAt, { order_number: orderNumber });
+
+  await createPaymentSession({
+    orderNumber,
+    email,
+    plan: 'premium-monthly',
+    status: 'created',
+    expiresAt: new Date(expiresAt),
+  });
 
   const query = new URLSearchParams({
     source_currency: config.sourceCurrency,
     source_amount: String(config.sourceAmount),
-    order_number: createOrderNumber(),
+    order_number: orderNumber,
     order_name: config.orderName,
     callback_url: config.callbackUrl,
     success_invoice_url: successUrl,
@@ -29,6 +46,7 @@ export default async function handler(request: any, response: any) {
     expire_min: '60',
     return_existing: '1',
     api_key: config.apiKey,
+    email,
   });
 
   if (config.allowedCoins) {
@@ -50,5 +68,6 @@ export default async function handler(request: any, response: any) {
     invoiceUrl: providerData.data.invoice_url,
     txnId: providerData.data.txn_id,
     expiresAt,
+    orderNumber,
   });
 }

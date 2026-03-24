@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Archive, CheckCircle2, Crown, Files, ShieldCheck, WandSparkles, X } from 'lucide-react';
+import { AlertCircle, Archive, CheckCircle2, Crown, Files, LoaderCircle, LogIn, LogOut, Mail, RefreshCw, ShieldCheck, WandSparkles, X } from 'lucide-react';
 
+import { consumeUsage, fetchAccountStatus, logoutAccount, requestMagicCode, verifyMagicCode } from '../lib/account';
 import { FileCard } from '../components/FileCard';
 import { FileDropZone } from '../components/FileDropZone';
 import { MetadataViewerModal } from '../components/MetadataViewerModal';
@@ -15,9 +16,8 @@ import {
 } from '../lib/fileTypes';
 import { createPreviewAsset } from '../lib/heicHelper';
 import { clearPlisioReturnState, createPlisioInvoice, getPlisioPlanLabel, getPlisioPriceLabel, isPlisioConfigured, readPlisioReturnState } from '../lib/plisio';
-import { activatePremium, activatePremiumUntil, clearPremiumState, loadPremiumState } from '../lib/premium';
 import { buildZipArchive } from '../lib/zipHelper';
-import type { ManagedFile, PremiumState, SelectiveRemovalKey } from '../types/app';
+import type { AccountStatus, ManagedFile, PremiumState, SelectiveRemovalKey, UsageState } from '../types/app';
 
 function revokeManagedFile(file: ManagedFile) {
   URL.revokeObjectURL(file.previewUrl);
@@ -27,14 +27,32 @@ function revokeManagedFile(file: ManagedFile) {
   }
 }
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 export function Home() {
   const [files, setFiles] = useState<ManagedFile[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [viewerId, setViewerId] = useState<string | null>(null);
-  const [premium, setPremium] = useState<PremiumState>(() => loadPremiumState());
+  const [premium, setPremium] = useState<PremiumState>({ active: false, expiresAt: null });
+  const [usage, setUsage] = useState<UsageState>({
+    date: '',
+    limit: 5,
+    used: 0,
+    remaining: 5,
+  });
+  const [authenticatedEmail, setAuthenticatedEmail] = useState<string | null>(null);
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(true);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authCode, setAuthCode] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [codeRequested, setCodeRequested] = useState(false);
+  const [devCode, setDevCode] = useState<string | null>(null);
+  const [paymentResult, setPaymentResult] = useState<{ status: 'success' | 'failed' | 'cancelled' | 'verifying'; orderNumber: string | null } | null>(null);
   const filesRef = useRef<ManagedFile[]>([]);
   const filesSectionRef = useRef<HTMLElement | null>(null);
   const previousFilesCountRef = useRef(0);
@@ -81,26 +99,71 @@ export function Home() {
   }, [files.length]);
 
   useEffect(() => {
-    const returnState = readPlisioReturnState();
+    let active = true;
 
-    if (!returnState) {
-      return;
+    async function hydrateStatus() {
+      const returnState = readPlisioReturnState();
+      const accountStatus = await refreshAccountStatus({ silent: true });
+
+      if (!active || !returnState) {
+        return;
+      }
+
+      if (returnState.status === 'success') {
+        if (accountStatus?.premium.active) {
+          setPaymentResult({
+            status: 'success',
+            orderNumber: returnState.orderNumber,
+          });
+          setNotice('Plisio payment confirmed. Premium unlocked.');
+        } else {
+          setPaymentResult({
+            status: 'verifying',
+            orderNumber: returnState.orderNumber,
+          });
+
+          window.setTimeout(async () => {
+            const refreshedStatus = await refreshAccountStatus({ silent: true });
+
+            if (!active) {
+              return;
+            }
+
+            if (refreshedStatus?.premium.active) {
+              setPaymentResult({
+                status: 'success',
+                orderNumber: returnState.orderNumber,
+              });
+              setNotice('Plisio payment confirmed. Premium unlocked.');
+            }
+          }, 2500);
+        }
+      }
+
+      if (returnState.status === 'failed') {
+        setPaymentResult({
+          status: 'failed',
+          orderNumber: returnState.orderNumber,
+        });
+        setNotice('Plisio payment was not completed.');
+      }
+
+      if (returnState.status === 'cancelled') {
+        setPaymentResult({
+          status: 'cancelled',
+          orderNumber: returnState.orderNumber,
+        });
+        setNotice('Plisio checkout was cancelled.');
+      }
+
+      clearPlisioReturnState();
     }
 
-    if (returnState.status === 'success') {
-      setPremium(returnState.expiresAt ? activatePremiumUntil(returnState.expiresAt) : activatePremium());
-      setNotice('Plisio payment confirmed. Premium unlocked.');
-    }
+    hydrateStatus();
 
-    if (returnState.status === 'failed') {
-      setNotice('Plisio payment was not completed.');
-    }
-
-    if (returnState.status === 'cancelled') {
-      setNotice('Plisio checkout was cancelled.');
-    }
-
-    clearPlisioReturnState();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const selectedFile = useMemo(() => files.find((file) => file.id === viewerId) ?? null, [files, viewerId]);
@@ -108,17 +171,40 @@ export function Home() {
   const overview = useMemo(() => {
     const cleanedFiles = files.filter((file) => file.cleaned);
     const removedTags = cleanedFiles.reduce((sum, file) => sum + (file.cleaned?.removedCount ?? 0), 0);
-    const gpsFiles = files.filter((file) => file.metadata?.gps).length;
 
     return {
       totalFiles: files.length,
       cleanedFiles: cleanedFiles.length,
       removedTags,
-      gpsFiles,
+      dailyRemaining: premium.active ? null : usage.remaining,
     };
-  }, [files]);
+  }, [files, premium.active, usage.remaining]);
 
   const cleanedFiles = useMemo(() => files.filter((file) => file.cleaned), [files]);
+  const checkoutEmail = authenticatedEmail || authEmail.trim().toLowerCase();
+
+  async function refreshAccountStatus(options: { silent?: boolean } = {}): Promise<AccountStatus | null> {
+    try {
+      const accountStatus = await fetchAccountStatus();
+      setPremium(accountStatus.premium);
+      setUsage(accountStatus.usage);
+      setAuthenticatedEmail(accountStatus.email);
+
+      if (accountStatus.email) {
+        setAuthEmail(accountStatus.email);
+      }
+
+      return accountStatus;
+    } catch (error) {
+      if (!options.silent) {
+        setNotice(error instanceof Error ? error.message : 'Failed to load account status.');
+      }
+
+      return null;
+    } finally {
+      setStatusLoading(false);
+    }
+  }
 
   async function handleAddFiles(selectedFiles: File[]) {
     const messages: string[] = [];
@@ -198,11 +284,11 @@ export function Home() {
     setFiles((currentFiles) => currentFiles.map((file) => (file.id === fileId ? updater(file) : file)));
   }
 
-  async function processFile(fileId: string, selectiveKeys: SelectiveRemovalKey[]) {
+  async function runFileCleanup(fileId: string, selectiveKeys: SelectiveRemovalKey[]) {
     const file = files.find((entry) => entry.id === fileId);
 
     if (!file || file.status === 'loading' || file.status === 'processing') {
-      return;
+      return false;
     }
 
     updateFile(fileId, (entry) => ({
@@ -249,23 +335,89 @@ export function Home() {
           };
         }),
       );
+
+      return true;
     } catch (error) {
       updateFile(fileId, (entry) => ({
         ...entry,
         status: entry.metadata ? 'ready' : 'error',
         error: error instanceof Error ? error.message : 'Failed to clean metadata.',
       }));
+
+      return false;
+    }
+  }
+
+  async function registerUsage(count: number) {
+    if (premium.active || count <= 0) {
+      return true;
+    }
+
+    try {
+      const result = await consumeUsage(count);
+      setUsage(result.usage);
+      return true;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Failed to update daily usage.');
+      setShowPremiumPrompt(true);
+      return false;
+    }
+  }
+
+  function hasEnoughDailyQuota(requiredCount: number) {
+    if (premium.active) {
+      return true;
+    }
+
+    const remaining = usage.remaining ?? 0;
+
+    if (remaining < requiredCount) {
+      setNotice(`Free plan allows ${remaining} more cleaned file${remaining === 1 ? '' : 's'} today.`);
+      setShowPremiumPrompt(true);
+      return false;
+    }
+
+    return true;
+  }
+
+  async function processFile(fileId: string, selectiveKeys: SelectiveRemovalKey[]) {
+    if (!hasEnoughDailyQuota(1)) {
+      return;
+    }
+
+    const succeeded = await runFileCleanup(fileId, selectiveKeys);
+
+    if (succeeded) {
+      await registerUsage(1);
     }
   }
 
   async function handleBulkRemoveAll() {
+    const eligibleFiles = files.filter((file) => file.status !== 'error');
+
+    if (eligibleFiles.length === 0) {
+      return;
+    }
+
+    if (!hasEnoughDailyQuota(eligibleFiles.length)) {
+      return;
+    }
+
     setBulkProcessing(true);
 
     try {
-      for (const file of files) {
-        if (file.status !== 'error') {
-          await processFile(file.id, []);
+      let succeededCount = 0;
+
+      for (const file of eligibleFiles) {
+        const succeeded = await runFileCleanup(file.id, []);
+
+        if (succeeded) {
+          succeededCount += 1;
         }
+      }
+
+      if (succeededCount > 0) {
+        await registerUsage(succeededCount);
       }
     } finally {
       setBulkProcessing(false);
@@ -318,6 +470,64 @@ export function Home() {
     setShowPremiumPrompt(true);
   }
 
+  async function handleSendCode() {
+    if (!isValidEmail(authEmail.trim().toLowerCase())) {
+      setNotice('Enter a valid email before requesting a sign-in code.');
+      return;
+    }
+
+    setAuthLoading(true);
+
+    try {
+      const result = await requestMagicCode(authEmail.trim().toLowerCase());
+      setCodeRequested(true);
+      setDevCode(result.devCode || null);
+      setNotice(`A sign-in code was sent to ${result.email}.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Failed to send sign-in code.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleVerifyCode() {
+    if (!isValidEmail(authEmail.trim().toLowerCase()) || !/^\d{6}$/.test(authCode.trim())) {
+      setNotice('Enter a valid email and a 6-digit code.');
+      return;
+    }
+
+    setAuthLoading(true);
+
+    try {
+      await verifyMagicCode(authEmail.trim().toLowerCase(), authCode.trim());
+      setAuthCode('');
+      setCodeRequested(false);
+      setDevCode(null);
+      await refreshAccountStatus({ silent: true });
+      setNotice('Signed in successfully.');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Failed to verify code.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    setAuthLoading(true);
+
+    try {
+      await logoutAccount();
+      setAuthenticatedEmail(null);
+      setPremium({ active: false, expiresAt: null });
+      await refreshAccountStatus({ silent: true });
+      setNotice('Signed out.');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Failed to sign out.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
   async function handlePlisioCheckout() {
     if (premium.active) {
       setShowPremiumPrompt(false);
@@ -329,10 +539,15 @@ export function Home() {
       return;
     }
 
+    if (!isValidEmail(checkoutEmail)) {
+      setNotice('Enter a valid email before opening Plisio checkout.');
+      return;
+    }
+
     setCheckoutLoading(true);
 
     try {
-      const invoice = await createPlisioInvoice();
+      const invoice = await createPlisioInvoice(checkoutEmail);
 
       if (invoice.txnId) {
         localStorage.setItem('metaremover-plisio-last-txn', invoice.txnId);
@@ -376,10 +591,138 @@ export function Home() {
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
             <div className="flex items-center gap-3 text-slate-400">
               <Archive className="h-5 w-5 text-violet-300" />
-              GPS files
+              {premium.active ? 'Daily limit' : 'Free files left'}
             </div>
-            <div className="mt-3 text-3xl font-semibold text-white">{overview.gpsFiles}</div>
+            <div className="mt-3 text-3xl font-semibold text-white">{premium.active ? 'Unlimited' : overview.dailyRemaining}</div>
           </div>
+        </section>
+
+        {paymentResult && (
+          <section
+            className={[
+              'rounded-[2rem] border p-6',
+              paymentResult.status === 'success'
+                ? 'border-emerald-400/20 bg-emerald-500/10'
+                : paymentResult.status === 'verifying'
+                  ? 'border-blue-400/20 bg-blue-500/10'
+                  : 'border-amber-400/20 bg-amber-400/10',
+            ].join(' ')}
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                  {paymentResult.status === 'success' ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                  ) : paymentResult.status === 'verifying' ? (
+                    <LoaderCircle className="h-5 w-5 animate-spin text-blue-300" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-amber-300" />
+                  )}
+                  {paymentResult.status === 'success'
+                    ? 'Payment confirmed'
+                    : paymentResult.status === 'verifying'
+                      ? 'Verifying payment'
+                      : paymentResult.status === 'failed'
+                        ? 'Payment failed'
+                        : 'Checkout cancelled'}
+                </div>
+                <p className="text-sm leading-6 text-slate-200">
+                  {paymentResult.status === 'success' && 'Premium is active for your account. Unlimited batch and selective removal are unlocked.'}
+                  {paymentResult.status === 'verifying' && 'Plisio returned successfully, but the webhook may still be processing. Refresh your account status in a few seconds.'}
+                  {paymentResult.status === 'failed' && 'Payment was not completed. You can try again from the premium prompt.'}
+                  {paymentResult.status === 'cancelled' && 'Checkout was cancelled before payment confirmation.'}
+                </p>
+                {paymentResult.orderNumber && <div className="text-xs text-slate-300">Order: {paymentResult.orderNumber}</div>}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => refreshAccountStatus()}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh status
+              </button>
+            </div>
+          </section>
+        )}
+
+        <section className="rounded-[2rem] border border-white/10 bg-slate-900/70 p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-2">
+              <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Account & limits</div>
+              <h2 className="text-2xl font-semibold text-white">
+                {authenticatedEmail ? authenticatedEmail : 'Sign in to restore premium on any device'}
+              </h2>
+              <p className="text-sm leading-6 text-slate-400">
+                {statusLoading
+                  ? 'Loading account status...'
+                  : premium.active
+                    ? 'Premium is stored on the backend and tied to your email account.'
+                    : `Free plan: ${usage.remaining ?? 0} of ${usage.limit ?? 5} cleaned files left today.`}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {authenticatedEmail ? (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={authLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </button>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(event) => setAuthEmail(event.target.value)}
+                    placeholder="Enter email for premium access"
+                    className="min-w-[260px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={authLoading}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Send code
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {!authenticatedEmail && codeRequested && (
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={authCode}
+                onChange={(event) => setAuthCode(event.target.value)}
+                placeholder="Enter 6-digit code"
+                className="min-w-[220px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+              />
+              <button
+                type="button"
+                onClick={handleVerifyCode}
+                disabled={authLoading}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <LogIn className="h-4 w-4" />
+                Verify code
+              </button>
+              {devCode && (
+                <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                  Dev code: {devCode}
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 lg:flex-row lg:items-center lg:justify-between">
@@ -387,8 +730,7 @@ export function Home() {
             <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Bulk actions</div>
             <h2 className="text-2xl font-semibold text-white">Remove everything locally, then export cleaned copies.</h2>
             <p className="max-w-3xl text-sm leading-6 text-slate-400">
-              Orientation is preserved for JPEG, ICC profiles are kept when possible and files auto-expire from memory in
-              10 minutes.
+              Orientation is preserved for JPEG, ICC profiles are kept when possible and free users can clean up to 5 files per day.
             </p>
           </div>
 
@@ -429,7 +771,7 @@ export function Home() {
                 premiumActive={premium.active}
                 onOpenViewer={() => setViewerId(file.id)}
                 onRemoveAll={() => processFile(file.id, [])}
-                onSelectiveRemove={() => processFile(file.id, premium.active ? file.selectiveKeys : [])}
+                onSelectiveRemove={() => processFile(file.id, file.selectiveKeys)}
                 onToggleSelectiveKey={(key) => handleToggleSelectiveKey(file.id, key)}
                 onDownload={() => file.cleaned && downloadBlob(file.cleaned.blob, file.cleaned.fileName)}
                 onDelete={() => handleDelete(file.id)}
@@ -458,7 +800,7 @@ export function Home() {
               </div>
               <h3 className="text-lg font-semibold text-white">Selective removal and unlimited batch are premium.</h3>
               <p className="text-sm leading-6 text-slate-300">
-                Unlimited batch and selective removal are unlocked after successful Plisio payment.
+                Premium is stored on the backend and linked to your email. Free users can clean up to 5 files per day.
               </p>
             </div>
             <button
@@ -469,24 +811,40 @@ export function Home() {
               <X className="h-4 w-4" />
             </button>
           </div>
+
+          <div className="mt-4 space-y-3">
+            <label className="block">
+              <div className="mb-2 text-xs uppercase tracking-[0.18em] text-slate-400">Premium email</div>
+              <input
+                type="email"
+                value={checkoutEmail}
+                onChange={(event) => setAuthEmail(event.target.value)}
+                placeholder="name@example.com"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+              />
+            </label>
+            <div className="text-xs text-slate-400">
+              {authenticatedEmail
+                ? `Signed in as ${authenticatedEmail}`
+                : 'This email will be used to restore premium on another device. You can also sign in from the account block above.'}
+            </div>
+          </div>
+
           <div className="mt-4 flex flex-wrap gap-3">
             {premium.active ? (
               <button
                 type="button"
-                onClick={() => {
-                  setPremium(clearPremiumState());
-                  setShowPremiumPrompt(false);
-                }}
+                onClick={() => setShowPremiumPrompt(false)}
                 className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8"
               >
-                Reset premium status
+                Premium is active
               </button>
             ) : (
               <>
                 <button
                   type="button"
                   onClick={handlePlisioCheckout}
-                  disabled={checkoutLoading || !isPlisioConfigured()}
+                  disabled={checkoutLoading || !isPlisioConfigured() || !isValidEmail(checkoutEmail)}
                   className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {checkoutLoading ? 'Opening Plisio...' : `Pay with Plisio - $${getPlisioPriceLabel()}`}

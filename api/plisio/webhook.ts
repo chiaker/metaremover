@@ -1,4 +1,5 @@
 import { getPlisioConfig, sendJson, verifyPlisioCallback } from './_shared.js';
+import { getOrCreateUserByEmail, getPaymentSession, updatePaymentSession, upsertPremiumEntitlement } from '../_lib/repository.js';
 
 export default async function handler(request: any, response: any) {
   if (request.method !== 'POST') {
@@ -15,6 +16,8 @@ export default async function handler(request: any, response: any) {
   }
 
   const payload = typeof request.body === 'object' && request.body ? request.body : {};
+  const orderNumber = typeof payload.order_number === 'string' ? payload.order_number : '';
+  const txnId = typeof payload.txn_id === 'string' ? payload.txn_id : null;
 
   if (!verifyPlisioCallback(payload, config.apiKey)) {
     sendJson(response, 422, { message: 'Invalid Plisio verify_hash.' });
@@ -23,13 +26,37 @@ export default async function handler(request: any, response: any) {
 
   const status = payload.status;
 
+  if (orderNumber) {
+    await updatePaymentSession({
+      orderNumber,
+      status: typeof status === 'string' ? status : 'unknown',
+      txnId,
+    });
+  }
+
   if (status === 'completed') {
+    const paymentSession = orderNumber ? await getPaymentSession(orderNumber) : null;
+
+    if (paymentSession?.email) {
+      const user = await getOrCreateUserByEmail(paymentSession.email);
+
+      if (user && paymentSession.expiresAt) {
+        await upsertPremiumEntitlement({
+          userId: user.id,
+          provider: 'plisio',
+          providerTxnId: txnId,
+          status: 'active',
+          expiresAt: new Date(paymentSession.expiresAt),
+        });
+      }
+    }
+
     sendJson(response, 200, {
       ok: true,
       message: 'Plisio payment confirmed.',
       status,
-      orderNumber: payload.order_number ?? null,
-      txnId: payload.txn_id ?? null,
+      orderNumber: orderNumber || null,
+      txnId,
     });
     return;
   }
@@ -38,7 +65,7 @@ export default async function handler(request: any, response: any) {
     ok: true,
     message: 'Plisio callback accepted.',
     status,
-    orderNumber: payload.order_number ?? null,
-    txnId: payload.txn_id ?? null,
+    orderNumber: orderNumber || null,
+    txnId,
   });
 }
