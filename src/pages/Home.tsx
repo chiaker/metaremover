@@ -837,7 +837,7 @@ export function Home() {
           </section>
         ) : (
           <section className="rounded-3xl border border-dashed border-stone-300/90 bg-white/50 px-8 py-14 text-center shadow-sm dark:border-stone-600 dark:bg-stone-800/40">
-            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Drop a photo to see what spy data is hiding inside.</h2>
+            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Select a photo to see what spy data is hiding inside.</h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-400">
               Try iPhone shots with GPS, camera JPEGs, HEIC from iOS, or plain PNGs—then anonymize them and check that
               pictures still look right after the hidden data is gone.

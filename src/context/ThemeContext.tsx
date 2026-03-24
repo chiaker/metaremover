@@ -13,10 +13,10 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): Theme {
   if (typeof window === 'undefined') {
-    return 'light';
+    return 'dark';
   }
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === 'dark' || raw === 'light' ? raw : 'light';
+  return raw === 'light' ? 'light' : 'dark';
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

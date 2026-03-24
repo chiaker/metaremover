@@ -1,4 +1,4 @@
-import { Shield, Upload, FolderOpen } from 'lucide-react';
+import { MessageSquare, Shield, Upload, FolderOpen } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
 import { DROPZONE_ACCEPT } from '../lib/fileTypes';
@@ -45,6 +45,15 @@ export function FileDropZone({ disabled = false, onFilesSelected }: FileDropZone
               Strip hidden GPS, camera info, and other tracking data from JPG, PNG, WebP, HEIC and TIFF. Your files never
               leave your device—clean copies download straight from your browser.
             </p>
+            <div className="flex max-w-2xl gap-3 rounded-2xl border border-amber-200/85 bg-amber-50/60 p-4 text-sm leading-6 text-stone-700 dark:border-amber-800/45 dark:bg-[#3a2e26]/55 dark:text-amber-50/95">
+              <MessageSquare className="mt-0.5 h-5 w-5 shrink-0 text-amber-800 dark:text-amber-400" strokeWidth={2} />
+              <p>
+                <span className="font-semibold text-stone-900 dark:text-stone-100">iMessage does not remove metadata</span>
+                {' '}
+                from the photos you send—location, camera, and other hidden fields can still travel with the image. Clean
+                copies here first when you need to share without that data.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
