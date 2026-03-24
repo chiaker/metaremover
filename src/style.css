@@ -1,7 +1,9 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family:
     Inter,
     ui-sans-serif,
@@ -10,13 +12,16 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  background:
-    radial-gradient(circle at top, rgba(59, 130, 246, 0.15), transparent 30%),
-    linear-gradient(180deg, #020617 0%, #0f172a 55%, #020617 100%);
+  background: linear-gradient(165deg, #faf8f5 0%, #f0ebe4 45%, #e8f0ec 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark {
+  color-scheme: dark;
+  background: linear-gradient(165deg, #252028 0%, #2d2a32 42%, #1f2826 100%);
 }
 
 * {
@@ -40,23 +45,39 @@ input {
 }
 
 .leaflet-container {
-  background: #0f172a;
+  background: #f5f2ed;
+}
+
+html.dark .leaflet-container {
+  background: #3d3835;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.35);
+  background: rgba(231, 229, 228, 0.6);
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: rgba(41, 37, 36, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(168, 162, 158, 0.45);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(120, 113, 108, 0.45);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(120, 113, 108, 0.4);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 162, 158, 0.35);
 }

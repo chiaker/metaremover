@@ -4,6 +4,7 @@ import { AlertCircle, Archive, CheckCircle2, Crown, Files, LoaderCircle, LogIn, 
 import { consumeUsage, fetchAccountStatus, logoutAccount, requestMagicCode, verifyMagicCode } from '../lib/account';
 import { FileCard } from '../components/FileCard';
 import { FileDropZone } from '../components/FileDropZone';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { MetadataViewerModal } from '../components/MetadataViewerModal';
 import { cleanMetadata, readMetadata } from '../lib/exifUtils';
 import {
@@ -615,18 +616,21 @@ export function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-stone-800 dark:text-stone-200">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex justify-end">
+          <ThemeToggle />
+        </div>
         <FileDropZone disabled={bulkProcessing} onFilesSelected={handleAddFiles} />
 
-        <section className="rounded-[2rem] border border-blue-400/20 bg-blue-500/10 p-6">
+        <section className="rounded-3xl border border-stone-200/90 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-2">
-              <div className="text-xs uppercase tracking-[0.18em] text-blue-200">Account & limits</div>
-              <h2 className="text-2xl font-semibold text-white">
+              <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Account & limits</div>
+              <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">
                 {authenticatedEmail ? `Signed in as ${authenticatedEmail}` : 'Sign in with email code to restore premium'}
               </h2>
-              <p className="text-sm leading-6 text-slate-200">
+              <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
                 {statusLoading
                   ? 'Loading account status...'
                   : premium.active
@@ -642,13 +646,13 @@ export function Home() {
                     value={authEmail}
                     onChange={(event) => setAuthEmail(event.target.value)}
                     placeholder="Enter your email"
-                    className="min-w-[240px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                    className="min-w-[240px] rounded-full border border-stone-200 bg-white px-4 py-3 text-sm text-stone-800 outline-none placeholder:text-stone-400 dark:border-stone-600 dark:bg-stone-900/50 dark:text-stone-100 dark:placeholder:text-stone-500"
                   />
                   <button
                     type="button"
                     onClick={handleSendCode}
                     disabled={authLoading}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-800 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-stone-200 dark:text-stone-900 dark:hover:bg-white"
                   >
                     <Mail className="h-4 w-4" />
                     Send code
@@ -659,7 +663,7 @@ export function Home() {
                   type="button"
                   onClick={handleLogout}
                   disabled={authLoading}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800/60 dark:text-stone-100 dark:hover:bg-stone-700/70"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign out
@@ -676,19 +680,19 @@ export function Home() {
                 value={authCode}
                 onChange={(event) => setAuthCode(event.target.value)}
                 placeholder="Enter 6-digit code"
-                className="min-w-[220px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                className="min-w-[220px] rounded-full border border-stone-200 bg-white px-4 py-3 text-sm text-stone-800 outline-none placeholder:text-stone-400 dark:border-stone-600 dark:bg-stone-900/50 dark:text-stone-100 dark:placeholder:text-stone-500"
               />
               <button
                 type="button"
                 onClick={handleVerifyCode}
                 disabled={authLoading}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-200 px-4 py-3 text-sm font-semibold text-violet-950 transition hover:bg-violet-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-violet-500/25 dark:text-violet-100 dark:hover:bg-violet-500/35"
               >
                 <LogIn className="h-4 w-4" />
                 Verify code
               </button>
               {devCode && (
-                <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                <div className="rounded-full border border-amber-200/90 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-100">
                   Dev code: {devCode}
                 </div>
               )}
@@ -697,56 +701,56 @@ export function Home() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
-            <div className="flex items-center gap-3 text-slate-400">
-              <Files className="h-5 w-5 text-blue-300" />
+          <div className="rounded-3xl border border-stone-200/90 bg-white/70 p-5 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
+            <div className="flex items-center gap-3 text-stone-500 dark:text-stone-400">
+              <Files className="h-5 w-5 text-violet-400 dark:text-violet-300/80" />
               Files loaded
             </div>
-            <div className="mt-3 text-3xl font-semibold text-white">{overview.totalFiles}</div>
+            <div className="mt-3 text-3xl font-semibold text-stone-800 dark:text-stone-100">{overview.totalFiles}</div>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
-            <div className="flex items-center gap-3 text-slate-400">
-              <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+          <div className="rounded-3xl border border-stone-200/90 bg-white/70 p-5 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
+            <div className="flex items-center gap-3 text-stone-500 dark:text-stone-400">
+              <CheckCircle2 className="h-5 w-5 text-teal-500/80 dark:text-teal-400/70" />
               Cleaned files
             </div>
-            <div className="mt-3 text-3xl font-semibold text-white">{overview.cleanedFiles}</div>
+            <div className="mt-3 text-3xl font-semibold text-stone-800 dark:text-stone-100">{overview.cleanedFiles}</div>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
-            <div className="flex items-center gap-3 text-slate-400">
-              <ShieldCheck className="h-5 w-5 text-cyan-300" />
+          <div className="rounded-3xl border border-stone-200/90 bg-white/70 p-5 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
+            <div className="flex items-center gap-3 text-stone-500 dark:text-stone-400">
+              <ShieldCheck className="h-5 w-5 text-rose-400 dark:text-rose-300/80" />
               Tags removed
             </div>
-            <div className="mt-3 text-3xl font-semibold text-white">{overview.removedTags}</div>
+            <div className="mt-3 text-3xl font-semibold text-stone-800 dark:text-stone-100">{overview.removedTags}</div>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
-            <div className="flex items-center gap-3 text-slate-400">
-              <Archive className="h-5 w-5 text-violet-300" />
+          <div className="rounded-3xl border border-stone-200/90 bg-white/70 p-5 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55">
+            <div className="flex items-center gap-3 text-stone-500 dark:text-stone-400">
+              <Archive className="h-5 w-5 text-amber-500/80 dark:text-amber-400/70" />
               {premium.active ? 'Daily limit' : 'Free files left'}
             </div>
-            <div className="mt-3 text-3xl font-semibold text-white">{premium.active ? 'Unlimited' : overview.dailyRemaining}</div>
+            <div className="mt-3 text-3xl font-semibold text-stone-800 dark:text-stone-100">{premium.active ? 'Unlimited' : overview.dailyRemaining}</div>
           </div>
         </section>
 
         {paymentResult && (
           <section
             className={[
-              'rounded-[2rem] border p-6',
+              'rounded-3xl border p-6 shadow-sm',
               paymentResult.status === 'success'
-                ? 'border-emerald-400/20 bg-emerald-500/10'
+                ? 'border-teal-200/90 bg-teal-50/60 dark:border-teal-800/40 dark:bg-teal-950/35'
                 : paymentResult.status === 'verifying'
-                  ? 'border-blue-400/20 bg-blue-500/10'
-                  : 'border-amber-400/20 bg-amber-400/10',
+                  ? 'border-violet-200/90 bg-violet-50/50 dark:border-violet-800/35 dark:bg-violet-950/30'
+                  : 'border-amber-200/90 bg-amber-50/50 dark:border-amber-800/35 dark:bg-amber-950/30',
             ].join(' ')}
           >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-stone-800 dark:text-stone-100">
                   {paymentResult.status === 'success' ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                    <CheckCircle2 className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                   ) : paymentResult.status === 'verifying' ? (
-                    <LoaderCircle className="h-5 w-5 animate-spin text-blue-300" />
+                    <LoaderCircle className="h-5 w-5 animate-spin text-violet-500 dark:text-violet-300" />
                   ) : (
-                    <AlertCircle className="h-5 w-5 text-amber-300" />
+                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   )}
                   {paymentResult.status === 'success'
                     ? 'Payment confirmed'
@@ -756,19 +760,19 @@ export function Home() {
                         ? 'Payment failed'
                         : 'Checkout cancelled'}
                 </div>
-                <p className="text-sm leading-6 text-slate-200">
+                <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
                   {paymentResult.status === 'success' && 'Premium is active for your account. Unlimited batch and selective removal are unlocked.'}
                   {paymentResult.status === 'verifying' && 'Plisio returned successfully, but the webhook may still be processing. Refresh your account status in a few seconds.'}
                   {paymentResult.status === 'failed' && 'Payment was not completed. You can try again from the premium prompt.'}
                   {paymentResult.status === 'cancelled' && 'Checkout was cancelled before payment confirmation.'}
                 </p>
-                {paymentResult.orderNumber && <div className="text-xs text-slate-300">Order: {paymentResult.orderNumber}</div>}
+                {paymentResult.orderNumber && <div className="text-xs text-stone-500 dark:text-stone-500">Order: {paymentResult.orderNumber}</div>}
               </div>
 
               <button
                 type="button"
                 onClick={() => refreshAccountStatus()}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800/60 dark:text-stone-100 dark:hover:bg-stone-700/70"
               >
                 <RefreshCw className="h-4 w-4" />
                 Refresh status
@@ -777,11 +781,11 @@ export function Home() {
           </section>
         )}
 
-        <section className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 lg:flex-row lg:items-center lg:justify-between">
+        <section className="flex flex-col gap-4 rounded-3xl border border-stone-200/90 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Bulk actions</div>
-            <h2 className="text-2xl font-semibold text-white">Remove everything locally, then export cleaned copies.</h2>
-            <p className="max-w-3xl text-sm leading-6 text-slate-400">
+            <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Bulk actions</div>
+            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Remove everything locally, then export cleaned copies.</h2>
+            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
               Orientation is preserved for JPEG, ICC profiles are kept when possible and free users can clean up to 5 files per day.
             </p>
           </div>
@@ -791,7 +795,7 @@ export function Home() {
               type="button"
               onClick={handleBulkRemoveAll}
               disabled={files.length === 0 || bulkProcessing}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-stone-200 dark:text-stone-900 dark:hover:bg-white"
             >
               <WandSparkles className="h-4 w-4" />
               {bulkProcessing ? 'Processing...' : 'Remove All Metadata'}
@@ -800,7 +804,7 @@ export function Home() {
               type="button"
               onClick={handleDownloadAll}
               disabled={files.every((file) => !file.cleaned)}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800/60 dark:text-stone-100 dark:hover:bg-stone-700/70"
             >
               <Archive className="h-4 w-4" />
               {cleanedFiles.length <= 1 ? 'Download File' : 'Download ZIP'}
@@ -809,7 +813,7 @@ export function Home() {
         </section>
 
         {notice && (
-          <div className="rounded-[1.5rem] border border-amber-400/20 bg-amber-400/10 px-5 py-4 text-sm text-amber-100">
+          <div className="rounded-3xl border border-amber-200/90 bg-amber-50/80 px-5 py-4 text-sm text-amber-950 dark:border-amber-800/40 dark:bg-amber-950/35 dark:text-amber-100">
             {notice}
           </div>
         )}
@@ -832,37 +836,37 @@ export function Home() {
             ))}
           </section>
         ) : (
-          <section className="rounded-[2rem] border border-dashed border-white/10 bg-white/[0.03] px-8 py-14 text-center">
-            <h2 className="text-2xl font-semibold text-white">Drop your first image to inspect metadata.</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          <section className="rounded-3xl border border-dashed border-stone-300/90 bg-white/50 px-8 py-14 text-center shadow-sm dark:border-stone-600 dark:bg-stone-800/40">
+            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Drop your first image to inspect metadata.</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-400">
               Test with iPhone GPS photos, Canon or Nikon JPEGs, HEIC from iOS and PNG files without EXIF to verify
               orientation retention and file size reduction after cleanup.
             </p>
           </section>
         )}
 
-        <footer className="border-t border-white/10 px-2 pt-2 pb-6 text-center text-sm text-slate-400">
-          Feedback: <a href="mailto:metaremover@releugva.resend.app" className="text-slate-200 underline underline-offset-4">metaremover@releugva.resend.app</a>
+        <footer className="border-t border-stone-200/80 px-2 pt-2 pb-6 text-center text-sm text-stone-500 dark:border-stone-600/50 dark:text-stone-400">
+          Feedback: <a href="mailto:metaremover@releugva.resend.app" className="text-stone-700 underline underline-offset-4 dark:text-stone-300">metaremover@releugva.resend.app</a>
         </footer>
       </div>
 
       {showPremiumPrompt && (
-        <div className="fixed bottom-5 right-5 z-50 w-[calc(100%-2rem)] max-w-md rounded-[1.75rem] border border-emerald-400/20 bg-slate-900/95 p-5 shadow-2xl shadow-black/40 backdrop-blur">
+        <div className="fixed bottom-5 right-5 z-50 w-[calc(100%-2rem)] max-w-md rounded-3xl border border-stone-200/90 bg-white/95 p-5 shadow-lg shadow-stone-300/50 backdrop-blur-md dark:border-stone-600/50 dark:bg-stone-800/95 dark:shadow-black/40">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-emerald-200">
-                <Crown className="h-4 w-4" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/90 bg-teal-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-teal-800 dark:border-teal-800/40 dark:bg-teal-950/40 dark:text-teal-200">
+                <Crown className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                 Premium feature
               </div>
-              <h3 className="text-lg font-semibold text-white">Selective removal and unlimited batch are premium.</h3>
-              <p className="text-sm leading-6 text-slate-300">
+              <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100">Selective removal and unlimited batch are premium.</h3>
+              <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
                 Premium is stored on the backend and linked to your email. Free users can clean up to 5 files per day.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowPremiumPrompt(false)}
-              className="inline-flex items-center justify-center rounded-full border border-white/10 p-2 text-slate-300 transition hover:bg-white/10"
+              className="inline-flex items-center justify-center rounded-full border border-stone-200 p-2 text-stone-600 transition hover:bg-stone-50 dark:border-stone-600 dark:text-stone-300 dark:hover:bg-stone-700/50"
             >
               <X className="h-4 w-4" />
             </button>
@@ -870,16 +874,16 @@ export function Home() {
 
           <div className="mt-4 space-y-3">
             <label className="block">
-              <div className="mb-2 text-xs uppercase tracking-[0.18em] text-slate-400">Premium email</div>
+              <div className="mb-2 text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Premium email</div>
               <input
                 type="email"
                 value={checkoutEmail}
                 onChange={(event) => setAuthEmail(event.target.value)}
                 placeholder="name@example.com"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm text-stone-800 outline-none placeholder:text-stone-400 dark:border-stone-600 dark:bg-stone-900/50 dark:text-stone-100 dark:placeholder:text-stone-500"
               />
             </label>
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-stone-500 dark:text-stone-500">
               {authenticatedEmail
                 ? `Signed in as ${authenticatedEmail}`
                 : 'This email will be used to restore premium on another device. You can also sign in from the account block above.'}
@@ -891,7 +895,7 @@ export function Home() {
               <button
                 type="button"
                 onClick={() => setShowPremiumPrompt(false)}
-                className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8"
+                className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800/60 dark:text-stone-100 dark:hover:bg-stone-700/70"
               >
                 Premium is active
               </button>
@@ -901,19 +905,19 @@ export function Home() {
                   type="button"
                   onClick={handlePlisioCheckout}
                   disabled={checkoutLoading || !isPlisioConfigured() || !isValidEmail(checkoutEmail)}
-                  className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center rounded-full bg-teal-200 px-4 py-3 text-sm font-semibold text-teal-950 transition hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-700/40 dark:text-teal-50 dark:hover:bg-teal-700/55"
                 >
                   {checkoutLoading ? 'Opening Plisio...' : `Pay with Plisio - $${getPlisioPriceLabel()}`}
                 </button>
                 {!isPlisioConfigured() && (
-                  <div className="w-full rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                  <div className="w-full rounded-2xl border border-amber-200/90 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800/40 dark:bg-amber-950/35 dark:text-amber-100">
                     Add `VITE_PLISIO_CREATE_INVOICE_URL` to enable checkout.
                   </div>
                 )}
               </>
             )}
           </div>
-          <div className="mt-3 text-xs text-slate-400">{getPlisioPlanLabel()}</div>
+          <div className="mt-3 text-xs text-stone-500 dark:text-stone-500">{getPlisioPlanLabel()}</div>
         </div>
       )}
 

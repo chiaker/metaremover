@@ -7,7 +7,7 @@ export const AUTO_CLEAR_MS = 10 * 60 * 1000;
 export const LOADING_PREVIEW_PLACEHOLDER =
   'data:image/svg+xml,' +
   encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="#020617"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"><rect width="800" height="600" fill="#f5f2ed"/></svg>',
   );
 
 export const DROPZONE_ACCEPT: Record<string, string[]> = {
