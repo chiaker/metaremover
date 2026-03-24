@@ -71,7 +71,7 @@ export function FileCard({
           className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-stone-200/90 bg-white/90 px-3 py-2 text-xs font-semibold text-stone-800 backdrop-blur-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-stone-600/60 dark:bg-stone-800/85 dark:text-stone-100 dark:hover:bg-stone-700/90"
         >
           <Eye className="h-4 w-4" />
-          View metadata
+          See hidden data
         </button>
       </div>
 
@@ -80,7 +80,7 @@ export function FileCard({
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-lg font-semibold text-stone-800 dark:text-stone-100">{file.file.name}</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">{file.metadata ? `${file.metadata.totalFields} tags found` : 'Metadata loading...'}</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">{file.metadata ? `${file.metadata.totalFields} hidden details found` : 'Loading photo details…'}</p>
             </div>
             <button
               type="button"
@@ -97,9 +97,9 @@ export function FileCard({
               {file.error
                 ? file.error
                 : file.status === 'loading'
-                  ? 'Reading metadata and building preview…'
+                  ? 'Scanning your photo for hidden data…'
                   : file.status === 'processing'
-                    ? 'Removing metadata in your browser…'
+                    ? 'Deleting spy data on your device…'
                     : file.previewNote || 'Ready for inspection and export.'}
             </span>
           </div>
@@ -117,7 +117,7 @@ export function FileCard({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            Remove All Metadata
+            Remove all hidden data
           </button>
           <button
             type="button"
@@ -132,8 +132,8 @@ export function FileCard({
         <div className="space-y-3 rounded-2xl border border-stone-200/80 bg-teal-50/30 p-4 dark:border-teal-800/30 dark:bg-teal-950/25">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">Selective removal</div>
-              <div className="text-xs text-stone-500 dark:text-stone-400">Premium only. JPEG gets field-level EXIF cleanup.</div>
+              <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">Pick what to delete</div>
+              <div className="text-xs text-stone-500 dark:text-stone-400">Premium only—choose GPS, camera info, and more (JPEG).</div>
             </div>
             {!premiumActive && (
               <div className="inline-flex items-center gap-1 rounded-full border border-amber-200/90 bg-amber-100/80 px-3 py-1 text-xs font-medium text-amber-900 dark:border-amber-700/40 dark:bg-amber-950/50 dark:text-amber-200">
@@ -196,18 +196,18 @@ export function FileCard({
             }}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-teal-200/90 bg-teal-100/60 px-4 py-3 text-sm font-semibold text-teal-900 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-teal-700/40 dark:bg-teal-900/35 dark:text-teal-100 dark:hover:bg-teal-900/50"
           >
-            Run selective removal
+            Remove selected hidden data
           </button>
         </div>
 
         {file.metadata && (
           <div className="grid gap-3 rounded-2xl border border-stone-200/80 bg-stone-50/40 p-4 text-sm text-stone-600 sm:grid-cols-2 dark:border-stone-600/40 dark:bg-stone-900/30 dark:text-stone-400">
             <div>
-              <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Can remove tags</div>
+              <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Can remove</div>
               <div className="mt-2 font-medium text-stone-800 dark:text-stone-100">{canRemoveTagsCount}</div>
             </div>
             <div>
-              <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Removed tags</div>
+              <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Already stripped</div>
               <div className="mt-2 font-medium text-teal-700 dark:text-teal-300">{file.cleaned?.removedCount ?? 0}</div>
             </div>
           </div>

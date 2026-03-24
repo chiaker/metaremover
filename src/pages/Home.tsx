@@ -395,7 +395,7 @@ export function Home() {
       updateFile(fileId, (entry) => ({
         ...entry,
         status: entry.metadata ? 'ready' : 'error',
-        error: error instanceof Error ? error.message : 'Failed to clean metadata.',
+        error: error instanceof Error ? error.message : 'Failed to remove hidden data.',
       }));
 
       return false;
@@ -482,7 +482,7 @@ export function Home() {
     const readyFiles = files.filter((file) => file.cleaned).map((file) => ({ name: file.cleaned!.fileName, blob: file.cleaned!.blob }));
 
     if (readyFiles.length === 0) {
-      setNotice('Run metadata cleanup first, then ZIP download becomes available.');
+      setNotice('Clean your photos first (remove hidden data), then ZIP download becomes available.');
       return;
     }
 
@@ -784,9 +784,9 @@ export function Home() {
         <section className="flex flex-col gap-4 rounded-3xl border border-stone-200/90 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-stone-600/40 dark:bg-stone-800/55 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Bulk actions</div>
-            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Remove everything locally, then export cleaned copies.</h2>
+            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Delete spy data from every photo, then download safe copies.</h2>
             <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
-              Orientation is preserved for JPEG, ICC profiles are kept when possible and free users can clean up to 5 files per day.
+              JPEG orientation stays correct when possible, ICC profiles are kept when we can, and free accounts can clean up to 5 files per day.
             </p>
           </div>
 
@@ -798,7 +798,7 @@ export function Home() {
               className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-stone-200 dark:text-stone-900 dark:hover:bg-white"
             >
               <WandSparkles className="h-4 w-4" />
-              {bulkProcessing ? 'Processing...' : 'Remove All Metadata'}
+              {bulkProcessing ? 'Processing...' : 'Remove all hidden data'}
             </button>
             <button
               type="button"
@@ -837,10 +837,10 @@ export function Home() {
           </section>
         ) : (
           <section className="rounded-3xl border border-dashed border-stone-300/90 bg-white/50 px-8 py-14 text-center shadow-sm dark:border-stone-600 dark:bg-stone-800/40">
-            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Drop your first image to inspect metadata.</h2>
+            <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">Drop a photo to see what spy data is hiding inside.</h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-400">
-              Test with iPhone GPS photos, Canon or Nikon JPEGs, HEIC from iOS and PNG files without EXIF to verify
-              orientation retention and file size reduction after cleanup.
+              Try iPhone shots with GPS, camera JPEGs, HEIC from iOS, or plain PNGs—then anonymize them and check that
+              pictures still look right after the hidden data is gone.
             </p>
           </section>
         )}
@@ -858,9 +858,9 @@ export function Home() {
                 <Crown className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                 Premium feature
               </div>
-              <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100">Selective removal and unlimited batch are premium.</h3>
+              <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100">Picking what spy data to delete—and cleaning unlimited files—is premium.</h3>
               <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
-                Premium is stored on the backend and linked to your email. Free users can clean up to 5 files per day.
+                Premium is saved on our servers and linked to your email. Free accounts can clean up to 5 files per day.
               </p>
             </div>
             <button

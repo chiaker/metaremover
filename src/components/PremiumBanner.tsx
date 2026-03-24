@@ -18,10 +18,11 @@ export function PremiumBanner({ premium, onActivate, onDisable }: PremiumBannerP
             <Crown className="h-4 w-4 text-teal-600 dark:text-teal-400" />
             Premium
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-800 dark:text-stone-100">Unlock selective removal and unlimited batch.</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-800 dark:text-stone-100">Choose what to strip—unlimited batch cleaning.</h2>
           <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Premium unlocks selective metadata removal, higher batch limits, original filenames on download, and fewer
-            upgrade prompts. Your subscription is tied to your account after checkout.
+            Premium lets you delete only the spy data you want (GPS, camera info, timestamps, and more), raises batch
+            limits, keeps original filenames on download, and shows fewer upgrade prompts. Your plan is tied to your
+            account after checkout.
           </p>
         </div>
 

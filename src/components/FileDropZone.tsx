@@ -39,11 +39,11 @@ export function FileDropZone({ disabled = false, onFilesSelected }: FileDropZone
           </div>
           <div className="space-y-3">
             <h1 className="max-w-2xl text-4xl font-semibold tracking-tight text-stone-800 sm:text-5xl dark:text-stone-100">
-              Remove image metadata directly in your browser.
+              Anonymize your photos. Delete spy data before you share.
             </h1>
             <p className="max-w-2xl text-base leading-7 text-stone-600 sm:text-lg dark:text-stone-400">
-              Your files never leave your device. Drop JPG, PNG, WebP, HEIC or TIFF images, inspect EXIF/IPTC/XMP/GPS
-              tags and export stripped copies locally.
+              Strip hidden GPS, camera info, and other tracking data from JPG, PNG, WebP, HEIC and TIFF. Your files never
+              leave your device—clean copies download straight from your browser.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -65,7 +65,7 @@ export function FileDropZone({ disabled = false, onFilesSelected }: FileDropZone
         <div className="grid gap-3 text-sm text-stone-600 dark:text-stone-400">
           <div className="rounded-2xl border border-stone-200/90 bg-stone-50/60 p-4 dark:border-stone-600/40 dark:bg-stone-900/35">
             <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Client-side only</div>
-            <div className="mt-2 text-base font-semibold text-stone-800 dark:text-stone-100">100% browser processing</div>
+            <div className="mt-2 text-base font-semibold text-stone-800 dark:text-stone-100">Runs only in your browser</div>
           </div>
           <div className="rounded-2xl border border-stone-200/90 bg-stone-50/60 p-4 dark:border-stone-600/40 dark:bg-stone-900/35">
             <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">GDPR-friendly</div>

@@ -83,7 +83,7 @@ export function MetadataTable({ sections }: MetadataTableProps) {
 
         {filteredSections.length === 0 && (
           <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/50 px-4 py-8 text-center text-sm text-stone-500 dark:border-stone-600 dark:bg-stone-900/25 dark:text-stone-500">
-            No metadata fields match your search.
+            No hidden data fields match your search.
           </div>
         )}
       </div>

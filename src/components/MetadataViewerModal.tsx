@@ -35,11 +35,11 @@ export function MetadataViewerModal({ file, onClose }: MetadataViewerModalProps)
       <div className="max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-lg shadow-stone-300/40 dark:border-stone-600/50 dark:bg-stone-800/95 dark:shadow-black/40">
         <div className="flex items-start justify-between gap-6 border-b border-stone-200/80 px-6 py-5 dark:border-stone-600/50">
           <div className="space-y-2">
-            <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Metadata Viewer</div>
+            <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Hidden data</div>
             <h2 className="text-2xl font-semibold text-stone-800 dark:text-stone-100">{file.file.name}</h2>
             <div className="flex flex-wrap gap-3 text-sm text-stone-500 dark:text-stone-400">
-              <span>{file.metadata.totalFields} tags detected</span>
-              {file.cleaned && <span>{file.cleaned.metadata.totalFields} tags after cleanup</span>}
+              <span>{file.metadata.totalFields} hidden details before</span>
+              {file.cleaned && <span>{file.cleaned.metadata.totalFields} hidden details after cleanup</span>}
             </div>
           </div>
 
@@ -67,11 +67,11 @@ export function MetadataViewerModal({ file, onClose }: MetadataViewerModalProps)
                 <div className="mt-3 grid gap-3 text-sm text-stone-700 sm:grid-cols-2 dark:text-stone-300">
                   <div className="rounded-2xl border border-stone-200/80 bg-white/80 p-3 dark:border-stone-600/50 dark:bg-stone-800/60">
                     <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">Before</div>
-                    <div className="mt-2 text-base font-semibold text-stone-800 dark:text-stone-100">{file.metadata.totalFields} tags</div>
+                    <div className="mt-2 text-base font-semibold text-stone-800 dark:text-stone-100">{file.metadata.totalFields} hidden details</div>
                   </div>
                   <div className="rounded-2xl border border-stone-200/80 bg-white/80 p-3 dark:border-stone-600/50 dark:bg-stone-800/60">
                     <div className="text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500">After</div>
-                    <div className="mt-2 text-base font-semibold text-stone-800 dark:text-stone-100">{file.cleaned.metadata.totalFields} tags</div>
+                    <div className="mt-2 text-base font-semibold text-stone-800 dark:text-stone-100">{file.cleaned.metadata.totalFields} hidden details</div>
                   </div>
                 </div>
               </div>
