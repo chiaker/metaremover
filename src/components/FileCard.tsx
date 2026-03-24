@@ -40,14 +40,35 @@ export function FileCard({
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/75 shadow-lg shadow-slate-950/30">
       <div className="relative aspect-[4/3] overflow-hidden border-b border-white/10 bg-slate-950">
-        <img src={file.previewUrl} alt={file.file.name} className="h-full w-full object-cover" />
+        {file.status === 'loading' ? (
+          <div className="relative flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+            <div className="pointer-events-none absolute inset-0 animate-pulse bg-blue-500/5" aria-hidden />
+            <div className="relative flex flex-col items-center gap-3 px-6">
+              <div className="relative">
+                <div className="absolute inset-0 animate-ping rounded-full bg-blue-400/20" style={{ animationDuration: '1.5s' }} aria-hidden />
+                <LoaderCircle className="relative h-11 w-11 animate-spin text-blue-400" strokeWidth={2} />
+              </div>
+              <p className="text-center text-sm font-medium text-slate-200">Working on your file…</p>
+              {file.kind === 'heic' ? (
+                <p className="max-w-[240px] text-center text-xs leading-relaxed text-slate-500">
+                  HEIC images can take a little while — everything runs on your device.
+                </p>
+              ) : (
+                <p className="text-center text-xs text-slate-500">Reading and preparing preview…</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <img src={file.previewUrl} alt={file.file.name} className="h-full w-full object-cover" />
+        )}
         <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-slate-950/80 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-200">
           {file.kind.toUpperCase()}
         </div>
         <button
           type="button"
           onClick={onOpenViewer}
-          className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-slate-950/85 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+          disabled={file.status === 'loading'}
+          className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-slate-950/85 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Eye className="h-4 w-4" />
           View metadata
@@ -70,14 +91,17 @@ export function FileCard({
             </button>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
-            {file.error
-              ? file.error
-              : file.status === 'loading'
-                ? 'Reading metadata and building preview...'
-                : file.status === 'processing'
-                  ? 'Removing metadata in browser...'
-                  : file.previewNote || 'Ready for inspection and export.'}
+          <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+            {file.status === 'loading' && <LoaderCircle className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-blue-400" />}
+            <span>
+              {file.error
+                ? file.error
+                : file.status === 'loading'
+                  ? 'Reading metadata and building preview…'
+                  : file.status === 'processing'
+                    ? 'Removing metadata in your browser…'
+                    : file.previewNote || 'Ready for inspection and export.'}
+            </span>
           </div>
         </div>
 
@@ -88,7 +112,11 @@ export function FileCard({
             disabled={file.status === 'loading' || file.status === 'processing'}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {file.status === 'processing' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {file.status === 'processing' || file.status === 'loading' ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             Remove All Metadata
           </button>
           <button

@@ -14,6 +14,7 @@ import {
   downloadBlob,
   isSupportedImage,
   materializeFile,
+  LOADING_PREVIEW_PLACEHOLDER,
 } from '../lib/fileTypes';
 import { createPreviewAsset } from '../lib/heicHelper';
 import { clearPlisioReturnState, createPlisioInvoice, getPlisioPlanLabel, getPlisioPriceLabel, isPlisioConfigured, readPlisioReturnState } from '../lib/plisio';
@@ -21,9 +22,11 @@ import { buildZipArchive } from '../lib/zipHelper';
 import type { AccountStatus, ManagedFile, PremiumState, SelectiveRemovalKey, UsageState } from '../types/app';
 
 function revokeManagedFile(file: ManagedFile) {
-  URL.revokeObjectURL(file.previewUrl);
+  if (file.previewUrl.startsWith('blob:')) {
+    URL.revokeObjectURL(file.previewUrl);
+  }
 
-  if (file.cleaned) {
+  if (file.cleaned?.url.startsWith('blob:')) {
     URL.revokeObjectURL(file.cleaned.url);
   }
 }
@@ -239,9 +242,25 @@ export function Home() {
 
     setNotice(messages.length > 0 ? messages.join(' ') : null);
 
-    const loadedEntries = await Promise.all(
-      acceptedFiles.map(async (file) => {
-        const kind = detectFileKind(file);
+    const placeholders: ManagedFile[] = acceptedFiles.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      kind: detectFileKind(file),
+      previewUrl: LOADING_PREVIEW_PLACEHOLDER,
+      selectiveKeys: [],
+      cleaned: undefined,
+      metadata: undefined,
+      status: 'loading',
+      error: undefined,
+      expiresAt: Date.now() + AUTO_CLEAR_MS,
+    }));
+
+    setFiles((currentFiles) => [...placeholders, ...currentFiles]);
+
+    await Promise.all(
+      placeholders.map(async (placeholder, index) => {
+        const file = acceptedFiles[index];
+        const kind = placeholder.kind;
         let localFile: File | undefined;
 
         try {
@@ -259,40 +278,59 @@ export function Home() {
             }
           }
 
-          return {
-            id: crypto.randomUUID(),
-            file: localFile,
-            kind,
-            previewUrl: URL.createObjectURL(preview.blob),
-            previewNote: preview.note,
-            metadata,
-            cleaned: undefined,
-            selectiveKeys: [],
-            status: 'ready',
-            error: undefined,
-            expiresAt: Date.now() + AUTO_CLEAR_MS,
-          } satisfies ManagedFile;
+          const previewUrl = URL.createObjectURL(preview.blob);
+
+          setFiles((currentFiles) =>
+            currentFiles.map((entry) => {
+              if (entry.id !== placeholder.id) {
+                return entry;
+              }
+
+              if (entry.previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(entry.previewUrl);
+              }
+
+              return {
+                ...entry,
+                file: localFile!,
+                previewUrl,
+                previewNote: preview.note,
+                metadata,
+                status: 'ready',
+                error: undefined,
+                expiresAt: Date.now() + AUTO_CLEAR_MS,
+              };
+            }),
+          );
         } catch (error) {
           const fallbackFile = localFile ?? file;
+          const previewUrl = URL.createObjectURL(fallbackFile);
 
-          return {
-            id: crypto.randomUUID(),
-            file: fallbackFile,
-            kind,
-            previewUrl: URL.createObjectURL(fallbackFile),
-            previewNote: undefined,
-            metadata: undefined,
-            cleaned: undefined,
-            selectiveKeys: [],
-            status: 'error',
-            error: error instanceof Error ? error.message : 'Could not process this file.',
-            expiresAt: Date.now() + AUTO_CLEAR_MS,
-          } satisfies ManagedFile;
+          setFiles((currentFiles) =>
+            currentFiles.map((entry) => {
+              if (entry.id !== placeholder.id) {
+                return entry;
+              }
+
+              if (entry.previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(entry.previewUrl);
+              }
+
+              return {
+                ...entry,
+                file: fallbackFile,
+                previewUrl,
+                previewNote: undefined,
+                metadata: undefined,
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Could not process this file.',
+                expiresAt: Date.now() + AUTO_CLEAR_MS,
+              };
+            }),
+          );
         }
       }),
     );
-
-    setFiles((currentFiles) => [...loadedEntries, ...currentFiles]);
   }
 
   function updateFile(fileId: string, updater: (file: ManagedFile) => ManagedFile): void {
@@ -327,7 +365,7 @@ export function Home() {
             return entry;
           }
 
-          if (entry.cleaned) {
+          if (entry.cleaned?.url.startsWith('blob:')) {
             URL.revokeObjectURL(entry.cleaned.url);
           }
 
