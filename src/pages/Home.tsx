@@ -566,6 +566,81 @@ export function Home() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
         <FileDropZone disabled={bulkProcessing} onFilesSelected={handleAddFiles} />
 
+        <section className="rounded-[2rem] border border-blue-400/20 bg-blue-500/10 p-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-2">
+              <div className="text-xs uppercase tracking-[0.18em] text-blue-200">Account & limits</div>
+              <h2 className="text-2xl font-semibold text-white">
+                {authenticatedEmail ? `Signed in as ${authenticatedEmail}` : 'Sign in with email code to restore premium'}
+              </h2>
+              <p className="text-sm leading-6 text-slate-200">
+                {premium.active
+                  ? 'Premium is active and stored on the backend.'
+                  : `Free plan: ${usage.remaining ?? 0} of ${usage.limit ?? 5} cleaned files left today.`}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {!authenticatedEmail ? (
+                <>
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(event) => setAuthEmail(event.target.value)}
+                    placeholder="Enter your email"
+                    className="min-w-[240px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={authLoading}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Send code
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={authLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!authenticatedEmail && codeRequested && (
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={authCode}
+                onChange={(event) => setAuthCode(event.target.value)}
+                placeholder="Enter 6-digit code"
+                className="min-w-[220px] rounded-full border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+              />
+              <button
+                type="button"
+                onClick={handleVerifyCode}
+                disabled={authLoading}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <LogIn className="h-4 w-4" />
+                Verify code
+              </button>
+              {devCode && (
+                <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                  Dev code: {devCode}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
             <div className="flex items-center gap-3 text-slate-400">
