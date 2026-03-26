@@ -39,19 +39,17 @@ export function FileDropZone({ disabled = false, onFilesSelected }: FileDropZone
           </div>
           <div className="space-y-3">
             <h1 className="max-w-2xl text-4xl font-semibold tracking-tight text-stone-800 sm:text-5xl dark:text-stone-100">
-              Anonymize your photos. Delete spy data before you share.
+              Anonymize your photos. Delete any tracking data before you share.
             </h1>
             <p className="max-w-2xl text-base leading-7 text-stone-600 sm:text-lg dark:text-stone-400">
-              Strip hidden GPS, camera info, and other tracking data from JPG, PNG, WebP, HEIC and TIFF. Your files never
-              leave your device—clean copies download straight from your browser.
+              Remove hidden GPS, camera information, and other metadata from JPG, PNG, WebP, HEIC, and TIFF files. Your files never leave your device—clean copies are downloaded directly from your browser.
             </p>
             <div className="flex max-w-2xl gap-3 rounded-2xl border border-amber-200/85 bg-amber-50/60 p-4 text-sm leading-6 text-stone-700 dark:border-amber-800/45 dark:bg-[#3a2e26]/55 dark:text-amber-50/95">
               <MessageSquare className="mt-0.5 h-5 w-5 shrink-0 text-amber-800 dark:text-amber-400" strokeWidth={2} />
               <p>
                 <span className="font-semibold text-stone-900 dark:text-stone-100">iMessage does not remove metadata</span>
                 {' '}
-                from the photos you send—location, camera, and other hidden fields can still travel with the image. Clean
-                copies here first when you need to share without that data.
+                from the photos you send — location, camera details, and other hidden information can still travel with the image. Use clean copies here first when you want to share without that data.
               </p>
             </div>
           </div>
