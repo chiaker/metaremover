@@ -1,53 +1,34 @@
+Here is the restructured and concise English version:
+
+---
+
 # MetaRemover
 
-## Plisio setup
+A service for removing metadata with premium access and Plisio crypto payments. 
 
-`Plisio` uses a secret API key, so checkout must be created by a backend endpoint, not directly from the browser.
+**Important:** Premium status and free limits (5 files/day) are controlled on the backend and tied to email-based auth. Plisio payments must be created on the backend (the secret key is never exposed to the client). Always use a single canonical domain (e.g., `www.metaremover.tech`) for all callbacks and return URLs.
 
-## Vercel setup
+---
 
-For `metaremover.tech` on `Vercel`, the project now includes ready API routes:
+## 🌍 Environment Variables
 
-```text
-api/auth/request-link.ts
-api/auth/verify.ts
-api/auth/logout.ts
-api/premium/status.ts
-api/usage/consume.ts
-api/plisio/create-invoice.ts
-api/plisio/webhook.ts
-```
+### Backend (Vercel / Local Server)
+Required variables for production are marked in bold.
 
-After deploy they become:
+*   **`DATABASE_URL`** — Neon database URL.
+*   **`PLISIO_SECRET_KEY`** — Plisio API secret key.
+*   **`RESEND_API_KEY`** — API key for sending emails (Resend).
+*   `PLISIO_PRICE_USD` — Price (default: `4.99`).
+*   `PLISIO_PLAN_NAME` — Plan name (default: `MetaRemover Premium`).
+*   `PLISIO_ALLOWED_COINS` — Allowed cryptocurrencies (e.g., `BTC,ETH,USDT`).
+*   `PLISIO_CALLBACK_URL` — Plisio webhook URL (`https://www.metaremover.tech/api/plisio/webhook?json=true`).
+*   `PLISIO_SUCCESS_URL` — Redirect URL after successful payment (`https://www.metaremover.tech/`).
+*   `PLISIO_FAIL_URL` — Redirect URL after failed payment (`https://www.metaremover.tech/`).
+*   `PREMIUM_DURATION_DAYS` — Premium duration in days (`30`).
+*   `AUTH_FROM_EMAIL` — Sender email (`MetaRemover <noreply@metaremover.tech>`).
 
-```text
-https://www.metaremover.tech/api/plisio/create-invoice
-https://www.metaremover.tech/api/plisio/webhook
-```
-
-### Vercel environment variables
-
-Add these in Vercel Project Settings -> Environment Variables:
-
-```text
-DATABASE_URL=your_neon_database_url
-PLISIO_SECRET_KEY=your_secret_key
-PLISIO_PRICE_USD=4.99
-PLISIO_PLAN_NAME=MetaRemover Premium
-PLISIO_ALLOWED_COINS=BTC,ETH,USDT
-PLISIO_CALLBACK_URL=https://www.metaremover.tech/api/plisio/webhook?json=true
-PLISIO_SUCCESS_URL=https://www.metaremover.tech/
-PLISIO_FAIL_URL=https://www.metaremover.tech/
-PREMIUM_DURATION_DAYS=30
-RESEND_API_KEY=your_resend_api_key
-AUTH_FROM_EMAIL=MetaRemover <noreply@metaremover.tech>
-```
-
-`DATABASE_URL`, `PLISIO_SECRET_KEY` and `RESEND_API_KEY` are required for the full production flow.
-
-### 1. Frontend env
-
-Copy `.env.example` to `.env` and set:
+### Frontend
+Copy `.env.example` to `.env` and configure:
 
 ```env
 VITE_PLISIO_CREATE_INVOICE_URL=/api/plisio/create-invoice
@@ -57,68 +38,46 @@ VITE_PLISIO_SUCCESS_URL=https://www.metaremover.tech/?provider=plisio&premium=su
 VITE_PLISIO_FAIL_URL=https://www.metaremover.tech/?provider=plisio&premium=failed
 ```
 
-### 2. Backend env
+---
 
-Before starting the example server set:
+## 🚀 Vercel Deployment (Production)
 
-```powershell
-$env:PLISIO_SECRET_KEY="your_secret_key"
-$env:PLISIO_ALLOWED_COINS="BTC,ETH,USDT"
-$env:PLISIO_CALLBACK_URL="https://www.metaremover.tech/api/plisio/webhook?json=true"
-```
+On Vercel, built-in API routes from the `api/` directory are used. The local example server (`examples/plisio-server.mjs`) is **not needed**.
 
-### 3. Run the example Plisio server
+1. Add all backend environment variables in *Vercel Project Settings -> Environment Variables*.
+2. Upon deployment, Vercel automatically creates the following endpoints:
+   * `/api/auth/request-link.ts`
+   * `/api/auth/verify.ts`
+   * `/api/auth/logout.ts`
+   * `/api/premium/status.ts`
+   * `/api/usage/consume.ts`
+   * `/api/plisio/create-invoice.ts`
+   * `/api/plisio/webhook.ts`
 
-```powershell
-npm run plisio:server
-```
+---
 
-It exposes:
+## 🛠 Local Development
 
-```text
-POST https://www.metaremover.tech/api/plisio/create-invoice
-```
+If running locally, the backend is served via a standalone server from the `examples/` directory.
 
-### 4. Run the frontend
+1. Set the backend environment variables in your terminal:
+   ```bash
+   $env:PLISIO_SECRET_KEY="your_secret_key"
+   $env:PLISIO_ALLOWED_COINS="BTC,ETH,USDT"
+   $env:PLISIO_CALLBACK_URL="https://www.metaremover.tech/api/plisio/webhook?json=true"
+   # ...and other backend variables
+   ```
+2. Start the local backend (exposes `POST /api/plisio/create-invoice`):
+   ```bash
+   npm run plisio:server
+   ```
+3. Start the frontend:
+   ```bash
+   npm run dev
+   ```
+   *(Or use `npm run build` and `npm run preview` to test the production build).*
 
-```powershell
-npm run dev
-```
-
-or
-
-```powershell
-npm run build
-npm run preview
-```
-
-### 5. Current frontend flow
-
-- User clicks a premium feature.
-- User enters an email for premium purchase or signs in with a one-time email code.
-- Frontend opens the premium prompt.
-- `Pay with Plisio` calls `VITE_PLISIO_CREATE_INVOICE_URL`.
-- Backend creates a payment session, stores the purchaser email and returns `invoiceUrl`.
-- Browser redirects to Plisio checkout.
-- `Plisio` webhook activates premium on the backend after confirmed payment.
-- Frontend reads account status from `/api/premium/status`.
-- Free users can clean up at most 5 files per day through `/api/usage/consume`.
-- After payment, frontend expects return params like:
-
-```text
-https://www.metaremover.tech/?provider=plisio&premium=success
-```
-
-Optional:
-
-```text
-https://www.metaremover.tech/?provider=plisio&premium=success&expires_at=1767225600000&txn_id=abc123
-```
-
-### Important
-
-- The included `examples/plisio-server.mjs` is only a starter integration.
-- On `Vercel`, prefer the built-in `api/plisio/*.ts` routes instead of the local example server.
-- Premium is now stored on the backend and tied to email-based sign-in.
-- Free daily quota is also enforced on the backend.
-- Use one canonical domain everywhere. If the site opens on `www.metaremover.tech`, then Plisio callback and return URLs must also use `www.metaremover.tech`.
+---
+6. User returns to the site with URL parameters: `?provider=plisio&premium=success` (optionally, `expires_at` and `txn_id` may be appended).
+7. Frontend verifies the account status via `/api/premium/status`.
+8. For free users, the daily limit (5 files) is enforced via `/api/usage/consume`.
