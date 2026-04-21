@@ -1,4 +1,3 @@
-Here is the restructured and concise English version:
 
 ---
 
